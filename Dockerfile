@@ -104,8 +104,3 @@ RUN (crontab -l 2>/dev/null; echo "0 1 * * 0 /home/linuxgsm/*server update-lgsm 
 
 # Run SteamCMD as LinuxGSM user
 RUN steamcmd +quit
-
-COPY entrypoint.sh /home/linuxgsm/entrypoint.sh
-
-ENTRYPOINT [ "/usr/bin/tini", "--" ]
-CMD [ "bash","./entrypoint.sh" ]
