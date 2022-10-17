@@ -11,6 +11,7 @@ LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+USER root
 
 ## Install Base LinuxGSM Requirements
 RUN echo "**** Install Base LinuxGSM Requirements ****" \
