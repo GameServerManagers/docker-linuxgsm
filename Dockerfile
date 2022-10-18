@@ -20,16 +20,17 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
     && add-apt-repository multiverse \
     && apt-get update \
     && apt-get install -y \
+	cron \
     bc \
     binutils \
     bsdmainutils \
     bzip2 \
     ca-certificates \
-	cron \
     cpio \
     curl \
     distro-info \
     file \
+	git \
     gzip \
     hostname \
     jq \
@@ -37,20 +38,19 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
     lib32stdc++6 \
     netcat \
     python3 \
+	sudo \
     tar \
+	tini \
     tmux \
     unzip \
     util-linux \
     wget \
     xz-utils \
     # Docker Extras
-    cron \
     iproute2 \
     iputils-ping \
     nano \
-    vim \
-    sudo \
-    tini
+    vim
 
 # Install NodeJS
 RUN echo "**** Install NodeJS ****" \
@@ -91,17 +91,27 @@ RUN echo "**** Add linuxgsm user ****" \
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
     && set -ex \
-    && wget -O linuxgsm.sh https://linuxgsm.sh \
+    && wget -O linuxgsm.sh https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/master/linuxgsm.sh \
     && chmod +x /linuxgsm.sh
 
 WORKDIR /home/linuxgsm
 ENV PATH=$PATH:/home/linuxgsm
 USER linuxgsm
 
+# Run SteamCMD as LinuxGSM user
+RUN steamcmd +quit
+
+RUN git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/GameServerManagers/LinuxGSM.git; \
+	cd LinuxGSM; \
+	git sparse-checkout set lgsm/functions; \
+	git checkout; \
+	mkdir -p /home/linuxgsm/lgsm/functions; \
+	mv lgsm/functions/* /home/linuxgsm/lgsm/functions; \
+	rm -rf /home/linuxgsm/LinuxGSM
+
 # Add LinuxGSM cronjobs
-RUN (crontab -l 2>/dev/null; echo "*/5 * * * * /home/linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
+RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /home/linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
 RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /home/linuxgsm/*server update > /dev/null 2>&1") | crontab -
 RUN (crontab -l 2>/dev/null; echo "0 1 * * 0 /home/linuxgsm/*server update-lgsm > /dev/null 2>&1") | crontab -
 
-# Run SteamCMD as LinuxGSM user
-RUN steamcmd +quit
+COPY entrypoint.sh /home/linuxgsm/entrypoint.sh
