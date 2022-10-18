@@ -107,6 +107,7 @@ RUN git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github
 	git checkout; \
 	mkdir -p /home/linuxgsm/lgsm/functions; \
 	mv lgsm/functions/* /home/linuxgsm/lgsm/functions; \
+	chmod +x /home/linuxgsm/lgsm/functions/*; \
 	rm -rf /home/linuxgsm/LinuxGSM
 
 # Add LinuxGSM cronjobs
