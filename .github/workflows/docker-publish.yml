@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   push:
-    branches: ["main","master"]
+    branches: ["main", "master"]
   schedule:
     - cron: "0 0 * * *"
 
@@ -35,27 +35,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            gameservermanagers/steamcmd:latest
-            gameservermanagers/steamcmd:ubuntu-22.04
-            ghcr.io/gameservermanagers/steamcmd:latest
-            ghcr.io/gameservermanagers/steamcmd:ubuntu-22.04
-      - name: Build and push (Ubuntu 20.04)
-        uses: docker/build-push-action@v3.2.0
-        with:
-          context: .
-          file: ./Dockerfile.ubuntu-2004
-          platforms: linux/amd64
-          push: true
-          tags: |
-            gameservermanagers/steamcmd:ubuntu-20.04
-            ghcr.io/gameservermanagers/steamcmd:ubuntu-20.04
-      - name: Build and push (Ubuntu 18.04)
-        uses: docker/build-push-action@v3.2.0
-        with:
-          context: .
-          file: ./Dockerfile.ubuntu-1804
-          platforms: linux/amd64
-          push: true
-          tags: |
-            gameservermanagers/steamcmd:ubuntu-18.04
-            ghcr.io/gameservermanagers/steamcmd:ubuntu-18.04
+            gameservermanagers/linuxgsm:latest
+            gameservermanagers/linuxgsm:ubuntu-22.04
+            ghcr.io/gameservermanagers/linuxgsm:latest
+            ghcr.io/gameservermanagers/linuxgsm:ubuntu-22.04
