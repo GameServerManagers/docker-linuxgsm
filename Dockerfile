@@ -15,59 +15,62 @@ USER root
 
 ## Install Base LinuxGSM Requirements
 RUN echo "**** Install Base LinuxGSM Requirements ****" \
-    && apt-get update \
-    && apt-get install -y software-properties-common \
-    && add-apt-repository multiverse \
-    && apt-get update \
-    && apt-get install -y \
-	cron \
-    bc \
-    binutils \
-    bsdmainutils \
-    bzip2 \
-    ca-certificates \
-    cpio \
-    curl \
-    distro-info \
-    file \
-	git \
-    gzip \
-    hostname \
-    jq \
-    lib32gcc-s1 \
-    lib32stdc++6 \
-    netcat \
-    python3 \
-	sudo \
-    tar \
-	tini \
-    tmux \
-    unzip \
-    util-linux \
-    wget \
-    xz-utils \
-    # Docker Extras
-    iproute2 \
-    iputils-ping \
-    nano \
-    vim
+  && apt-get update \
+  && apt-get install -y software-properties-common \
+  && add-apt-repository multiverse \
+  && apt-get update \
+  && apt-get install -y \
+  cron \
+  bc \
+  binutils \
+  bsdmainutils \
+  bzip2 \
+  ca-certificates \
+  cpio \
+  curl \
+  distro-info \
+  file \
+  git \
+  gzip \
+  hostname \
+  jq \
+  lib32gcc-s1 \
+  lib32stdc++6 \
+  netcat \
+  python3 \
+  sudo \
+  tar \
+  tini \
+  tmux \
+  unzip \
+  util-linux \
+  wget \
+  xz-utils \
+  # Docker Extras
+  iproute2 \
+  iputils-ping \
+  nano \
+  vim \
+  && apt-get -y autoremove \
+  && apt-get -y clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /tmp/* \
+  && rm -rf /var/tmp/*
 
 # Install NodeJS
 RUN echo "**** Install NodeJS ****" \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get update && apt-get install -y nodejs
+  && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+  && apt-get update \
+  && apt-get install -y nodejs \
+  && apt-get -y autoremove \
+  && apt-get -y clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /tmp/* \
+  && rm -rf /var/tmp/*
 
 # Install GameDig https://docs.linuxgsm.com/requirements/gamedig
 RUN echo "**** Install GameDig ****" \
-    && npm install -g gamedig
-
-# Install Cleanup
-RUN echo "**** Cleanup ****"  \
-    && apt-get -y autoremove \
-    && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/*
+  && npm install -g gamedig
 
 ##Need use xterm for LinuxGSM##
 
@@ -79,20 +82,20 @@ ARG USER_GID=$USER_UID
 
 ## Add linuxgsm user
 RUN echo "**** Add linuxgsm user ****" \
-# Create the user
-    && groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    #
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
-    && chown $USERNAME:$USERNAME /home/$USERNAME
+  # Create the user
+  && groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+  #
+  # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME \
+  && chown $USERNAME:$USERNAME /home/$USERNAME
 
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
-    && set -ex \
-    && wget -O linuxgsm.sh https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/master/linuxgsm.sh \
-    && chmod +x /linuxgsm.sh
+  && set -ex \
+  && wget -O linuxgsm.sh https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/master/linuxgsm.sh \
+  && chmod +x /linuxgsm.sh
 
 WORKDIR /home/linuxgsm
 ENV PATH=$PATH:/home/linuxgsm
@@ -102,13 +105,13 @@ USER linuxgsm
 RUN steamcmd +quit
 
 RUN git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/GameServerManagers/LinuxGSM.git; \
-	cd LinuxGSM; \
-	git sparse-checkout set lgsm/functions; \
-	git checkout; \
-	mkdir -p /home/linuxgsm/lgsm/functions; \
-	mv lgsm/functions/* /home/linuxgsm/lgsm/functions; \
-	chmod +x /home/linuxgsm/lgsm/functions/*; \
-	rm -rf /home/linuxgsm/LinuxGSM
+  cd LinuxGSM; \
+  git sparse-checkout set lgsm/functions; \
+  git checkout; \
+  mkdir -p /home/linuxgsm/lgsm/functions; \
+  mv lgsm/functions/* /home/linuxgsm/lgsm/functions; \
+  chmod +x /home/linuxgsm/lgsm/functions/*; \
+  rm -rf /home/linuxgsm/LinuxGSM
 
 # Add LinuxGSM cronjobs
 RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /home/linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
