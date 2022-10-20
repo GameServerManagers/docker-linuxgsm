@@ -73,16 +73,15 @@ RUN echo "**** Install GameDig ****" \
   && npm install -g gamedig
 
 ARG USERNAME=linuxgsm
-ARG USER_UID=1000
-ARG USER_GID=${USER_UID}
+ARG UID=1000
+ARG GID=1000
 
 ## Add linuxgsm user
 RUN echo "**** Add linuxgsm user ****" \
   # Create the user
-  && groupadd --gid ${USER_GID} ${USERNAME} \
-  && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
-  #
-  # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+  && groupadd --gid ${GID} ${USERNAME} \
+  && useradd --uid ${UID} --gid ${GID} -m ${USERNAME} \
+  && usermod --shell /bin/bash ${USERNAME} \
   && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
   && chmod 0440 /etc/sudoers.d/${USERNAME} \
   && chown ${USERNAME}:${USERNAME} /home/${USERNAME}
