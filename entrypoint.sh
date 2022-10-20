@@ -12,15 +12,23 @@ echo "loading exit trap"
 trap exit_handler SIGTERM
 
 echo "update permissions for linuxgsm"
-sudo chown -R $USER_UID:$USER_GID /home/linuxgsm
+if [ -z "${USER_UID}" ]; then
+    USER_UID=1000
+fi
+if [ -z "${USER_GID}" ]; then
+    USER_GID=1000
+fi
+usermod -u ${USER_UID} linuxgsm
+groupmod -g ${USER_GID} linuxgsm
+sudo chown -R ${USER_UID}:${USER_GID} /home/linuxgsm
 
 echo -e "Welcome to the LinuxGSM Docker"
 echo -e "================================================================================"
 echo -e "GAMESERVER: ${GAMESERVER}"
 echo -e ""
 echo -e "USER: $USERNAME"
-echo -e "UID: $USER_UID"
-echo -e "GID: $USER_GID"
+echo -e "UID: ${USER_UID}"
+echo -e "GID: ${USER_GID}"
 echo -e ""
 echo -e "LGSM_GITHUBUSER: ${LGSM_GITHUBUSER}"
 echo -e "LGSM_GITHUBREPO: ${LGSM_GITHUBREPO}"
