@@ -1,7 +1,7 @@
 #
 # LinuxGSM Base Dockerfile
 #
-# https://github.com/GameServerManagers/LinuxGSM-Docker
+# https://github.com/GameServerManagers/docker-linuxgsm
 #
 
 FROM gameservermanagers/steamcmd:ubuntu-22.04
