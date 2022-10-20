@@ -11,6 +11,9 @@ exit_handler () {
 echo "loading exit trap"
 trap exit_handler SIGTERM
 
+echo "update permissions for linuxgsm"
+sudo chown -R $USER_UID:$USER_GID /home/linuxgsm
+
 echo -e "Welcome to the LinuxGSM Docker"
 echo -e "================================================================================"
 echo -e "GAMESERVER: ${GAMESERVER}"
@@ -26,9 +29,6 @@ echo -e "LGSM_GITHUBBRANCH: ${LGSM_GITHUBBRANCH}"
 echo -e ""
 echo -e "Initalising"
 echo -e "================================================================================"
-# Correct permissions in home dir
-echo "update permissions for linuxgsm"
-sudo chown -R linuxgsm:linuxgsm /home/linuxgsm
 
 # Copy linuxgsm.sh into homedir
 if [ ! -e ~/linuxgsm.sh ]; then
