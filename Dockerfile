@@ -97,14 +97,24 @@ RUN echo "**** Download linuxgsm.sh ****" \
   && wget -O linuxgsm.sh https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/master/linuxgsm.sh \
   && chmod +x /linuxgsm.sh
 
+# Create linuxgsm symlinks
+RUN echo "**** Create Symlinks ****" \
+  ln -sn /home/linuxgsm/serverfiles /serverfiles; \
+  ln -sn /home/linuxgsm/lgsm/config-lgsm /config-lgsm; \
+  ln -sn /home/linuxgsm/lgsm/logs /logs
+
 WORKDIR /home/linuxgsm
 ENV PATH=$PATH:/home/linuxgsm
 USER linuxgsm
 
 # Run SteamCMD as LinuxGSM user
-RUN steamcmd +quit
+RUN echo "**** Prepare SteamCMD ****" \
+  mkdir -pv /home/linuxgsm/.steam/root \
+  mkdir -pv /home/linuxgsm/.steam/steam \
+  steamcmd +quit
 
-RUN git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/GameServerManagers/LinuxGSM.git; \
+RUN echo "**** Get LinuxGSM Modules ****" \
+  git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/GameServerManagers/LinuxGSM.git; \
   cd LinuxGSM; \
   git sparse-checkout set lgsm/functions; \
   git checkout; \
@@ -114,8 +124,8 @@ RUN git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github
   rm -rf /home/linuxgsm/LinuxGSM
 
 # Add LinuxGSM cronjobs
+RUN echo "**** Create Cronjobs ****"
 RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /home/linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
 RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /home/linuxgsm/*server update > /dev/null 2>&1") | crontab -
-RUN (crontab -l 2>/dev/null; echo "0 1 * * 0 /home/linuxgsm/*server update-lgsm > /dev/null 2>&1") | crontab -
 
 COPY entrypoint.sh /home/linuxgsm/entrypoint.sh
