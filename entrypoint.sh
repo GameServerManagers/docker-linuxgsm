@@ -42,7 +42,7 @@ if [ ! -f "${GAMESERVER}" ]; then
   ./linuxgsm.sh ${GAMESERVER}
 fi
 
-if [ --d "/linuxgsm/lgsm/functions"]; then
+if [ -d "/linuxgsm/lgsm/functions" ]; then
   echo ""
   echo "check all functions are executable"
   chmod +x /linuxgsm/lgsm/functions/*
