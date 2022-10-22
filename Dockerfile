@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 ENV LGSM_GITHUBUSER=GameServerManagers
 ENV LGSM_GITHUBREPO=LinuxGSM
-ENV LGSM_GITHUBBRANCH=master
+ENV LGSM_GITHUBBRANCH=develop
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Install Base LinuxGSM Requirements
