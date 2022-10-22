@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 ENV LGSM_GITHUBUSER=GameServerManagers
 ENV LGSM_GITHUBREPO=LinuxGSM
-ENV LGSM_GITHUBBRANCH=develop
+ENV LGSM_GITHUBBRANCH=master
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Install Base LinuxGSM Requirements
@@ -108,5 +108,3 @@ RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /linuxgsm/*server update > /dev/
 RUN rm -f /linuxgsm/entrypoint.sh
 COPY entrypoint.sh /linuxgsm/entrypoint.sh
 RUN date > /time.txt
-ENTRYPOINT [ "/usr/bin/tini", "--" ]
-CMD [ "bash","./entrypoint.sh" ]

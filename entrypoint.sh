@@ -1,10 +1,9 @@
 #!/bin/bash
 
 exit_handler() {
-  # Execute the  shutdown commands
+  # Execute the shutdown commands
   echo "recieved SIGTERM stopping ${GAMESERVER}"
   ./${GAMESERVER} stop
-  exit 0
 }
 
 # Exit trap
@@ -12,7 +11,7 @@ echo "loading exit trap"
 trap exit_handler SIGTERM
 
 echo -e ""
-echo -e "Welcome to the DockerGSM"
+echo -e "Welcome to the LinuxGSM"
 echo -e "================================================================================"
 echo -e "TIME: $(date)"
 echo -e "SCRIPT TIME: $(cat /time.txt)"
@@ -38,6 +37,7 @@ cd /linuxgsm || exit
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
+  echo ""
   echo "creating ./${GAMESERVER}"
   ./linuxgsm.sh ${GAMESERVER}
 fi
@@ -49,6 +49,7 @@ fi
 
 # Install game server
 if [ -z "$(ls -A -- "serverfiles")" ]; then
+  echo ""
   echo "installing ${GAMESERVER}"
   ./${GAMESERVER} auto-install
 fi
