@@ -42,6 +42,12 @@ if [ ! -f "${GAMESERVER}" ]; then
   ./linuxgsm.sh ${GAMESERVER}
 fi
 
+if [ --d "/linuxgsm/lgsm/functions"]; then
+  echo ""
+  echo "check all functions are executable"
+  chmod +x /linuxgsm/lgsm/functions/*
+fi
+
 # Clear functions directory if not master
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
   rm -rf /linuxgsm/lgsm/functions/*
@@ -54,7 +60,7 @@ if [ -z "$(ls -A -- "serverfiles")" ]; then
   ./${GAMESERVER} auto-install
 fi
 
-echo "Starting cron"
+echo "starting cron"
 cron
 
 # Update game server
