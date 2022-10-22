@@ -10,8 +10,10 @@ LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
+ENV LGSM_GITHUBUSER=GameServerManagers
+ENV LGSM_GITHUBREPO=LinuxGSM
+ENV LGSM_GITHUBBRANCH=develop
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-USER root
 
 ## Install Base LinuxGSM Requirements
 RUN echo "**** Install Base LinuxGSM Requirements ****" \
@@ -57,8 +59,8 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/*
 
-# Install NodeJS
-RUN echo "**** Install NodeJS ****" \
+# Install Node.js
+RUN echo "**** Install Node.js ****" \
   && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
   && apt-get update \
   && apt-get install -y nodejs \
@@ -72,55 +74,39 @@ RUN echo "**** Install NodeJS ****" \
 RUN echo "**** Install GameDig ****" \
   && npm install -g gamedig
 
-ARG USERNAME=linuxgsm
-ARG UID=1000
-ARG GID=1000
-
-## Add linuxgsm user
-RUN echo "**** Add linuxgsm user ****" \
-  # Create the user
-  && groupadd --gid ${GID} ${USERNAME} \
-  && useradd --uid ${UID} --gid ${GID} -m ${USERNAME} \
-  && usermod --shell /bin/bash ${USERNAME} \
-  && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
-  && chmod 0440 /etc/sudoers.d/${USERNAME} \
-  && chown ${USERNAME}:${USERNAME} /home/${USERNAME}
+WORKDIR /linuxgsm
 
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
   && set -ex \
-  && wget -O linuxgsm.sh https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/master/linuxgsm.sh \
-  && chmod +x /linuxgsm.sh
+  && mkdir -p /linuxgsm/lgsm \
+  && wget -O linuxgsm.sh "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/linuxgsm.sh" \
+  && chmod +x linuxgsm.sh
 
 # Create linuxgsm symlinks
 RUN echo "**** Create Symlinks ****" \
-  ln -sn /home/linuxgsm/serverfiles /serverfiles; \
-  ln -sn /home/linuxgsm/lgsm/config-lgsm /config-lgsm; \
-  ln -sn /home/linuxgsm/lgsm/logs /logs
-
-WORKDIR /home/linuxgsm
-ENV PATH=$PATH:/home/linuxgsm
-USER linuxgsm
-
-# Run SteamCMD as LinuxGSM user
-RUN echo "**** Prepare SteamCMD ****" \
-  mkdir -pv /home/linuxgsm/.steam/root \
-  mkdir -pv /home/linuxgsm/.steam/steam \
-  steamcmd +quit
+  && ln -sn /serverfiles /linuxgsm/serverfiles \
+  && ln -sn /config-lgsm /linuxgsm/lgsm/config-lgsm \
+  && ln -sn /logs /linuxgsm/lgsm/logs
 
 RUN echo "**** Get LinuxGSM Modules ****" \
-  git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/GameServerManagers/LinuxGSM.git; \
-  cd LinuxGSM; \
-  git sparse-checkout set lgsm/functions; \
-  git checkout; \
-  mkdir -p /home/linuxgsm/lgsm/functions; \
-  mv lgsm/functions/* /home/linuxgsm/lgsm/functions; \
-  chmod +x /home/linuxgsm/lgsm/functions/*; \
-  rm -rf /home/linuxgsm/LinuxGSM
+  && git clone --filter=blob:none --no-checkout --sparse https://github.com/GameServerManagers/LinuxGSM.git \
+  && cd LinuxGSM \
+  && git sparse-checkout set --cone \
+  && git sparse-checkout set lgsm/functions \
+  && git checkout ${LGSM_GITHUBBRANCH} \
+  && mkdir -p /linuxgsm/lgsm/functions \
+  && mv lgsm/functions/* /linuxgsm/lgsm/functions \
+  && chmod +x /linuxgsm/lgsm/functions/* \
+  && rm -rf /linuxgsm/LinuxGSM
 
 # Add LinuxGSM cronjobs
 RUN echo "**** Create Cronjobs ****"
-RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /home/linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
-RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /home/linuxgsm/*server update > /dev/null 2>&1") | crontab -
+RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
+RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /linuxgsm/*server update > /dev/null 2>&1") | crontab -
 
-COPY entrypoint.sh /home/linuxgsm/entrypoint.sh
+RUN rm -f /linuxgsm/entrypoint.sh
+COPY entrypoint.sh /linuxgsm/entrypoint.sh
+RUN date > /time.txt
+ENTRYPOINT [ "/usr/bin/tini", "--" ]
+CMD [ "bash","./entrypoint.sh" ]

@@ -11,20 +11,11 @@ exit_handler() {
 echo "loading exit trap"
 trap exit_handler SIGTERM
 
-echo "update permissions for linuxgsm"
-if [ -z "${UID}" ]; then
-  UID=1000
-fi
-if [ -z "${GID}" ]; then
-  GID=1000
-fi
-sudo usermod -u ${UID} linuxgsm
-sudo groupmod -g ${GID} linuxgsm
-sudo chown -R ${UID}:${GID} /home/linuxgsm
-reset
-
-echo -e "Welcome to the LinuxGSM Docker"
+echo -e ""
+echo -e "Welcome to the DockerGSM"
 echo -e "================================================================================"
+echo -e "TIME: $(date)"
+echo -e "SCRIPT TIME: $(cat /time.txt)"
 echo -e "GAMESERVER: ${GAMESERVER}"
 echo -e ""
 echo -e "USER: ${USERNAME}"
@@ -39,16 +30,21 @@ echo -e ""
 echo -e "Initalising"
 echo -e "================================================================================"
 
-# Copy linuxgsm.sh into homedir
-if [ ! -e ~/linuxgsm.sh ]; then
-  echo "copying linuxgsm.sh to /home/linuxgsm"
-  cp /linuxgsm.sh ~/linuxgsm.sh
-fi
+export LGSM_GITHUBUSER=${LGSM_GITHUBUSER}
+export LGSM_GITHUBREPO=${LGSM_GITHUBREPO}
+export LGSM_GITHUBBRANCH=${LGSM_GITHUBBRANCH}
+
+cd /linuxgsm || exit
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo "creating ./${GAMESERVER}"
   ./linuxgsm.sh ${GAMESERVER}
+fi
+
+# Clear functions directory if not master
+if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
+  rm -rf /linuxgsm/lgsm/functions/*
 fi
 
 # Install game server
@@ -57,8 +53,8 @@ if [ -z "$(ls -A -- "serverfiles")" ]; then
   ./${GAMESERVER} auto-install
 fi
 
-echo "starting cron"
-sudo cron
+echo "Starting cron"
+cron
 
 # Update game server
 echo ""
