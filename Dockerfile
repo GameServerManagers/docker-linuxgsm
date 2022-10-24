@@ -83,12 +83,6 @@ RUN echo "**** Download linuxgsm.sh ****" \
   && wget -O linuxgsm.sh "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/linuxgsm.sh" \
   && chmod +x linuxgsm.sh
 
-# Create linuxgsm symlinks
-RUN echo "**** Create Symlinks ****" \
-  && ln -sn /serverfiles /linuxgsm/serverfiles \
-  && ln -sn /config-lgsm /linuxgsm/lgsm/config-lgsm \
-  && ln -sn /logs /linuxgsm/lgsm/logs
-
 RUN echo "**** Get LinuxGSM Modules ****" \
   && git clone --filter=blob:none --no-checkout --sparse https://github.com/GameServerManagers/LinuxGSM.git \
   && cd LinuxGSM \
