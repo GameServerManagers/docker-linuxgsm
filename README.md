@@ -1,7 +1,7 @@
 # LinuxGSM Docker Image
 
 <p align="center">
-  <a href="https://developer.valvesoftware.com/wiki/SteamCMD"><img src="https://user-images.githubusercontent.com/4478206/197542699-ae13797a-78bb-4f37-81c2-d4880fd7709f.jpg" alt="SteamCMD"></a>
+  <a href="https://linuxgsm.com"><img src="[https://user-images.githubusercontent.com/4478206/197542699-ae13797a-78bb-4f37-81c2-d4880fd7709f.jpg](https://user-images.githubusercontent.com/4478206/197897104-bb718d2e-09a0-4f83-8e86-c829044750a9.jpg)" alt="LinuxGSM"></a>
 <br>
 <a href="https://hub.docker.com/r/steamcmd/steamcmd"><img src="https://img.shields.io/docker/pulls/gameservermanagers/steamcmd.svg?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker Pulls"></a>
 <a href="https://github.com/GameServerManagers/docker-steamcmd/actions"><img src="https://img.shields.io/github/workflow/status/gameservermanagers/docker-steamcmd/Docker%20Publish?style=flat-square&logo=github&logoColor=white" alt="GitHub Workflow Status"></a>
