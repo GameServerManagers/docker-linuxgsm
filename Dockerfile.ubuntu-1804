@@ -21,6 +21,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && apt-get install -y software-properties-common \
   && add-apt-repository multiverse \
   && add-apt-repository ppa:git-core/ppa \
+  && add-apt-repository ppa:jfhovinne/bionic-testing \
   && apt-get update \
   && apt-get install -y \
   cron \
