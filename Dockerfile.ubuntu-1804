@@ -96,8 +96,9 @@ RUN echo "**** Get LinuxGSM Modules ****" \
 
 # Add LinuxGSM cronjobs
 RUN echo "**** Create Cronjobs ****"
-RUN (crontab -l 2>/dev/null; echo "*/1 * * * * /linuxgsm/*server monitor > /dev/null 2>&1") | crontab -
 RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /linuxgsm/*server update > /dev/null 2>&1") | crontab -
+
+HEALTHCHECK --interval=1m --timeout=1m --start-period=15s --retries=1 CMD [ "/linuxgsm/*server monitor" ]
 
 RUN rm -f /linuxgsm/entrypoint.sh
 COPY entrypoint.sh /linuxgsm/entrypoint.sh
