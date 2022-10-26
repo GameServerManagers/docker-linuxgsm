@@ -36,7 +36,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   gzip \
   hostname \
   jq \
-  lib32gcc-s1 \
+  lib32gcc1 \
   lib32stdc++6 \
   netcat \
   python3 \
@@ -95,7 +95,7 @@ RUN echo "**** Get LinuxGSM Modules ****" \
   && rm -rf /linuxgsm/LinuxGSM
 
 # Add LinuxGSM cronjobs
-RUN echo "**** Create Cronjobs ****"
+RUN echo "**** Create Cronjob ****"
 RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /linuxgsm/*server update > /dev/null 2>&1") | crontab -
 
 HEALTHCHECK --interval=1m --timeout=1m --start-period=15s --retries=1 CMD [ "/linuxgsm/*server monitor" ]

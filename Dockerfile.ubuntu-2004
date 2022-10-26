@@ -36,7 +36,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   gzip \
   hostname \
   jq \
-  lib32gcc-s1 \
+  lib32gcc1 \
   lib32stdc++6 \
   netcat \
   python3 \
