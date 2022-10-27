@@ -71,10 +71,10 @@ echo "updating ${GAMESERVER}"
 echo ""
 echo "starting ${GAMESERVER}"
 ./${GAMESERVER} start
-sleep 2
+sleep 5
 ./${GAMESERVER} details
 sleep 2
-tail -f log/script/*
+tail -F log/script/*
 
 # with no command, just spawn a running container suitable for exec's
 if [ $# = 0 ]; then
