@@ -60,6 +60,9 @@ if [ -z "$(ls -A -- "serverfiles")" ]; then
   echo ""
   echo "installing ${GAMESERVER}"
   ./${GAMESERVER} auto-install
+else
+  # Donate to display logo
+  ./${GAMESERVER} donate
 fi
 
 echo "starting cron"
