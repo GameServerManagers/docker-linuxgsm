@@ -105,3 +105,6 @@ HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /linuxg
 RUN rm -f /linuxgsm/entrypoint.sh
 COPY entrypoint.sh /linuxgsm/entrypoint.sh
 RUN date > /time.txt
+
+ENTRYPOINT [ "/usr/bin/tini","-g","--" ]
+CMD [ "bash","./entrypoint.sh" ]

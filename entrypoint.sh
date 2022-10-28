@@ -2,13 +2,15 @@
 
 exit_handler() {
   # Execute the shutdown commands
-  echo "recieved SIGTERM stopping ${GAMESERVER}"
+  echo "stopping ${GAMESERVER}"
   ./${GAMESERVER} stop
+  exitcode=$?
+  exit ${exitcode}
 }
 
 # Exit trap
-echo "loading exit trap"
-trap exit_handler SIGTERM
+echo "Loading exit handler"
+trap exit_handler SIGQUIT SIGINT SIGTERM
 
 echo -e ""
 echo -e "Welcome to the LinuxGSM"
