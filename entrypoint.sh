@@ -2,14 +2,14 @@
 
 exit_handler() {
   # Execute the shutdown commands
-  echo "stopping ${GAMESERVER}"
+  echo -e "stopping ${GAMESERVER}"
   ./${GAMESERVER} stop
   exitcode=$?
   exit ${exitcode}
 }
 
 # Exit trap
-echo "Loading exit handler"
+echo -e "Loading exit handler"
 trap exit_handler SIGQUIT SIGINT SIGTERM
 
 echo -e ""
@@ -39,14 +39,14 @@ cd /linuxgsm || exit
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
-  echo ""
-  echo "creating ./${GAMESERVER}"
+  echo -e ""
+  echo -e "creating ./${GAMESERVER}"
   ./linuxgsm.sh ${GAMESERVER}
 fi
 
 if [ -d "/linuxgsm/lgsm/functions" ]; then
-  echo ""
-  echo "check all functions are executable"
+  echo -e ""
+  echo -e "check all functions are executable"
   chmod +x /linuxgsm/lgsm/functions/*
 fi
 
@@ -57,29 +57,35 @@ fi
 
 # Install game server
 if [ -z "$(ls -A -- "serverfiles")" ]; then
-  echo ""
-  echo "installing ${GAMESERVER}"
+  echo -e ""
+  echo -e "Installing ${GAMESERVER}"
+  echo -e "================================="
   ./${GAMESERVER} auto-install
 else
   # Donate to display logo
   ./${GAMESERVER} donate
 fi
 
-echo "starting cron"
+echo -e "Starting cron"
+echo -e "================================="
 cron
 
 # Update game server
-echo ""
-echo "updating ${GAMESERVER}"
+echo -e ""
+echo -e "Updating ${GAMESERVER}"
+echo -e "================================="
 ./${GAMESERVER} update
 
-echo ""
-echo "starting ${GAMESERVER}"
+echo -e ""
+echo -e "Starting ${GAMESERVER}"
+echo -e "================================="
 ./${GAMESERVER} start
 sleep 5
 ./${GAMESERVER} details
 sleep 2
-tail -F log/script/*
+echo -e "Tail log files"
+echo -e "================================="
+tail -F log/*/*.log
 
 # with no command, just spawn a running container suitable for exec's
 if [ $# = 0 ]; then
