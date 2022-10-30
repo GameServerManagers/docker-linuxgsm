@@ -7,7 +7,6 @@
 FROM gameservermanagers/steamcmd:ubuntu-20.04
 
 LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
-
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 ENV LGSM_GITHUBUSER=GameServerManagers
