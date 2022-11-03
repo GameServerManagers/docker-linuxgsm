@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
 exit_handler() {
   # Execute the shutdown commands
@@ -15,8 +15,8 @@ trap exit_handler SIGQUIT SIGINT SIGTERM
 echo -e ""
 echo -e "Welcome to the LinuxGSM"
 echo -e "================================================================================"
-echo -e "TIME: $(date)"
-echo -e "SCRIPT TIME: $(cat /time.txt)"
+echo -e "CURRENT TIME: $(date)"
+echo -e "BUILD TIME: $(cat /build-time.txt)"
 echo -e "GAMESERVER: ${GAMESERVER}"
 echo -e ""
 echo -e "USER: ${USERNAME}"
@@ -37,6 +37,9 @@ export LGSM_GITHUBBRANCH=${LGSM_GITHUBBRANCH}
 
 cd /linuxgsm || exit
 
+# permissions
+chown -R linuxgsm:linuxgsm /linuxgsm
+
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""
@@ -44,15 +47,15 @@ if [ ! -f "${GAMESERVER}" ]; then
   ./linuxgsm.sh ${GAMESERVER}
 fi
 
-if [ -d "/linuxgsm/lgsm/functions" ]; then
+# Clear functions directory if not master
+if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
+  echo -e ""
+  echo -e "not master branch, clearing functions directory"
+  rm -rf /linuxgsm/lgsm/functions/*
+elif [ -d "/linuxgsm/lgsm/functions" ]; then
   echo -e ""
   echo -e "check all functions are executable"
   chmod +x /linuxgsm/lgsm/functions/*
-fi
-
-# Clear functions directory if not master
-if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
-  rm -rf /linuxgsm/lgsm/functions/*
 fi
 
 # Install game server
@@ -61,6 +64,7 @@ if [ -z "$(ls -A -- "serverfiles")" ]; then
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
   ./${GAMESERVER} auto-install
+  install=1
 else
   # Donate to display logo
   ./${GAMESERVER} donate
@@ -68,13 +72,16 @@ fi
 
 echo -e "Starting cron"
 echo -e "================================="
-cron
+#cron
+nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update >/dev/null 2>&1 &
 
 # Update game server
-echo -e ""
-echo -e "Updating ${GAMESERVER}"
-echo -e "================================="
-./${GAMESERVER} update
+if [ -z "${install}" ]; then
+  echo -e ""
+  echo -e "Updating ${GAMESERVER}"
+  echo -e "================================="
+  ./${GAMESERVER} update
+fi
 
 echo -e ""
 echo -e "Starting ${GAMESERVER}"
