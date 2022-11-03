@@ -7,11 +7,18 @@
 FROM gameservermanagers/steamcmd:ubuntu-22.04
 
 LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
+ARG S6_OVERLAY_VERSION=3.1.2.1
+ARG OVERLAY_ARCH="amd64"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 ENV LGSM_GITHUBUSER=GameServerManagers
 ENV LGSM_GITHUBREPO=LinuxGSM
 ENV LGSM_GITHUBBRANCH=develop
+ENV GAMESERVER=jc3server
+ENV UPDATE_CHECK=1800
+ENV USERNAME=linuxgsm
+ENV UID=1000
+ENV GID=1000
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Install Base LinuxGSM Requirements
@@ -42,7 +49,6 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   python3 \
   sudo \
   tar \
-  tini \
   tmux \
   unzip \
   util-linux \
@@ -74,8 +80,37 @@ RUN echo "**** Install Node.js ****" \
 RUN echo "**** Install GameDig ****" \
   && npm install -g gamedig
 
+# Install s6 overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
+
+RUN date > /build-time.txt
+
 WORKDIR /linuxgsm
 
+COPY entrypoint.sh /linuxgsm/entrypoint.sh
+
+## Add linuxgsm user
+RUN echo "**** Add linuxgsm user ****" \
+  # Create the user
+  && groupadd --gid $GID $USERNAME \
+  && useradd --uid $UID --gid $GID -m $USERNAME \
+  #
+  # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME \
+  && chown $USERNAME:$USERNAME /home/$USERNAME \
+  && chown -R $USERNAME:$USERNAME /linuxgsm
+
+HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /linuxgsm/*server monitor || exit 1
+
+USER linuxgsm
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
   && set -ex \
@@ -98,11 +133,5 @@ RUN echo "**** Get LinuxGSM Modules ****" \
 RUN echo "**** Create Cronjob ****"
 RUN (crontab -l 2>/dev/null; echo "*/30 * * * * /linuxgsm/*server update > /dev/null 2>&1") | crontab -
 
-HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /linuxgsm/*server monitor || exit 1
-
-RUN rm -f /linuxgsm/entrypoint.sh
-COPY entrypoint.sh /linuxgsm/entrypoint.sh
-RUN date > /time.txt
-
-ENTRYPOINT [ "/usr/bin/tini","-g","--" ]
-CMD [ "bash","./entrypoint.sh" ]
+ENTRYPOINT ["/init"]
+CMD [ "./entrypoint.sh" ]
