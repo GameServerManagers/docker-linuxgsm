@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  linuxgsm:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.ubuntu-2204
+    container_name: jc2server
+    environment:
+      - GAMESERVER=jc2server
+      - LGSM_GITHUBUSER=GameServerManagers
+      - LGSM_GITHUBREPO=LinuxGSM
+      - LGSM_GITHUBBRANCH=develop
+    volumes:
+      - /home/linuxgsm/jc2server/serverfiles:/linuxgsm/serverfiles
+      - /home/linuxgsm/jc2server/log:/linuxgsm/log
+      - /home/linuxgsm/jc2server/config-lgsm:/linuxgsm/config-lgsm
+    ports:
+      - "25565:25565/tcp"
+      - "25575:25575/udp"
+    restart: unless-stopped
