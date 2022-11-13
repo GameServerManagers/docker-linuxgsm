@@ -38,6 +38,10 @@ export LGSM_GITHUBBRANCH=${LGSM_GITHUBBRANCH}
 cd /linuxgsm || exit
 
 # permissions
+usermod -u ${UID} linuxgsm
+groupmod -g ${GID} linuxgsm
+find /linuxgsm -user ${UID} -exec chown -h linuxgsm {} \;
+find /linuxgsm -group ${GID} -exec chgrp -h linuxgsm {} \;
 chown -R linuxgsm:linuxgsm /linuxgsm
 
 # Setup game server
@@ -70,7 +74,7 @@ else
   ./${GAMESERVER} donate
 fi
 
-echo -e "Starting cron"
+echo -e "Starting Monitor"
 echo -e "================================="
 #cron
 nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update >/dev/null 2>&1 &
