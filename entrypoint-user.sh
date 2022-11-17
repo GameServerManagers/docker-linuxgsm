@@ -29,11 +29,6 @@ else
   ./${GAMESERVER} donate
 fi
 echo -e ""
-echo -e "Starting Monitor"
-echo -e "================================="
-nohup watch -n "${MONITOR_CHECK}" ./${GAMESERVER} monitor >/dev/null 2>&1 &
-echo -e "monitor will check every ${MONITOR_CHECK} minutes"
-echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
 nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update >/dev/null 2>&1 &
