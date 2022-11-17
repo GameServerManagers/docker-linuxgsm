@@ -5,7 +5,7 @@ if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""
   echo -e "creating ${GAMESERVER}"
   echo -e "================================="
-  ./linuxgsm.sh ${GAMESERVER}
+  exec s6-setuidgid ${USERNAME} ./linuxgsm.sh ${GAMESERVER}
 fi
 
 # Clear functions directory if not master
@@ -22,16 +22,16 @@ if [ -z "$(ls -A -- "serverfiles" >/dev/null 2>&1)" ]; then
   echo -e ""
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
-  ./${GAMESERVER} auto-install
+  exec s6-setuidgid ${USERNAME} ./${GAMESERVER} auto-install
   install=1
 else
   # Donate to display logo
-  ./${GAMESERVER} donate
+  exec s6-setuidgid ${USERNAME} ./${GAMESERVER} donate
 fi
 echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
-nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update >/dev/null 2>&1 &
+nohup watch -n "${UPDATE_CHECK}" exec s6-setuidgid ${USERNAME} ./${GAMESERVER} update >/dev/null 2>&1 &
 echo -e "update will check every ${UPDATE_CHECK} minutes"
 
 # Update game server
@@ -39,15 +39,15 @@ if [ -z "${install}" ]; then
   echo -e ""
   echo -e "Checking for Update ${GAMESERVER}"
   echo -e "================================="
-  ./${GAMESERVER} update
+  exec s6-setuidgid ${USERNAME} ./${GAMESERVER} update
 fi
 
 echo -e ""
 echo -e "Starting ${GAMESERVER}"
 echo -e "================================="
-./${GAMESERVER} start
+exec s6-setuidgid ${USERNAME} ./${GAMESERVER} start
 sleep 5
-./${GAMESERVER} details
+exec s6-setuidgid ${USERNAME} ./${GAMESERVER} details
 sleep 2
 echo -e "Tail log files"
 echo -e "================================="
