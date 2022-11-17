@@ -11,13 +11,14 @@ exit_handler() {
 # Exit trap
 echo -e "Loading exit handler"
 trap exit_handler SIGQUIT SIGINT SIGTERM
-
+DISTRO="$(grep "PRETTY_NAME" /etc/os-release | awk -F = '{gsub(/"/,"",$2);print $2}')"
 echo -e ""
 echo -e "Welcome to the LinuxGSM"
 echo -e "================================================================================"
 echo -e "CURRENT TIME: $(date)"
 echo -e "BUILD TIME: $(cat /build-time.txt)"
 echo -e "GAMESERVER: ${GAMESERVER}"
+echo -e "DISTRO: ${DISTRO}"
 echo -e ""
 echo -e "USER: ${USERNAME}"
 echo -e "UID: ${UID}"
@@ -37,82 +38,19 @@ export LGSM_GITHUBBRANCH=${LGSM_GITHUBBRANCH}
 
 cd /linuxgsm || exit
 
-# permissions
-usermod -u ${UID} linuxgsm
+echo -e ""
+echo -e "Check Permissions"
+echo -e "================================="
+echo -e "setting UID to ${UID}"
+usermod -u ${UID} linuxgsm >/dev/null 2>&1
+echo -e "setting GID to ${GID}"
 groupmod -g ${GID} linuxgsm
+echo -e "updating permissions"
 find /linuxgsm -user ${UID} -exec chown -h linuxgsm {} \;
 find /linuxgsm -group ${GID} -exec chgrp -h linuxgsm {} \;
-chown -R linuxgsm:linuxgsm /linuxgsm
-
-# Setup game server
-if [ ! -f "${GAMESERVER}" ]; then
-  echo -e ""
-  echo -e "creating ./${GAMESERVER}"
-  ./linuxgsm.sh ${GAMESERVER}
-fi
-
-# Clear functions directory if not master
-if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
-  echo -e ""
-  echo -e "not master branch, clearing functions directory"
-  rm -rf /linuxgsm/lgsm/functions/*
-elif [ -d "/linuxgsm/lgsm/functions" ]; then
-  echo -e ""
-  echo -e "check all functions are executable"
-  chmod +x /linuxgsm/lgsm/functions/*
-fi
-
-# Install game server
-if [ -z "$(ls -A -- "serverfiles")" ]; then
-  echo -e ""
-  echo -e "Installing ${GAMESERVER}"
-  echo -e "================================="
-  ./${GAMESERVER} auto-install
-  install=1
-else
-  # Donate to display logo
-  ./${GAMESERVER} donate
-fi
-
-echo -e "Starting Monitor"
-echo -e "================================="
-#cron
-nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update >/dev/null 2>&1 &
-
-# Update game server
-if [ -z "${install}" ]; then
-  echo -e ""
-  echo -e "Updating ${GAMESERVER}"
-  echo -e "================================="
-  ./${GAMESERVER} update
-fi
+chown -R ${USERNAME}:${USERNAME} /linuxgsm
 
 echo -e ""
-echo -e "Starting ${GAMESERVER}"
+echo -e "Switch to user ${USERNAME}"
 echo -e "================================="
-./${GAMESERVER} start
-sleep 5
-./${GAMESERVER} details
-sleep 2
-echo -e "Tail log files"
-echo -e "================================="
-tail -F log/*/*.log
-
-# with no command, just spawn a running container suitable for exec's
-if [ $# = 0 ]; then
-  tail -f /dev/null
-else
-  # execute the command passed through docker
-  "$@"
-
-  # if this command was a server start cmd
-  # to get around LinuxGSM running everything in
-  # tmux;
-  # we attempt to attach to tmux to track the server
-  # this keeps the container running
-  # when invoked via docker run
-  # but requires -it or at least -t
-  tmux set -g status off && tmux attach 2>/dev/null
-fi
-
-exec "$@"
+exec s6-setuidgid ${USERNAME} /linuxgsm/entrypoint-user.sh
