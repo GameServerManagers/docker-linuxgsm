@@ -3,7 +3,7 @@
 exit_handler() {
   # Execute the shutdown commands
   echo -e "stopping ${GAMESERVER}"
-  ./${GAMESERVER} stop
+  exec s6-setuidgid ${USERNAME} ./${GAMESERVER} stop
   exitcode=$?
   exit ${exitcode}
 }
