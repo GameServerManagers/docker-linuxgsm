@@ -18,7 +18,7 @@ elif [ -d "/linuxgsm/lgsm/functions" ]; then
 fi
 
 # Install game server
-if [ -z "$(ls -A -- "serverfiles" >/dev/null 2>&1)" ]; then
+if [ -z "$(ls -A -- "serverfiles" 2> /dev/null)" ]; then
   echo -e ""
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
@@ -31,7 +31,7 @@ fi
 echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
-nohup watch -n "${UPDATE_CHECK}" exec ./${GAMESERVER} update >/dev/null 2>&1 &
+nohup watch -n "${UPDATE_CHECK}" exec ./${GAMESERVER} update > /dev/null 2>&1 &
 echo -e "update will check every ${UPDATE_CHECK} minutes"
 
 # Update game server
@@ -67,7 +67,7 @@ else
   # this keeps the container running
   # when invoked via docker run
   # but requires -it or at least -t
-  tmux set -g status off && tmux attach 2>/dev/null
+  tmux set -g status off && tmux attach 2> /dev/null
 fi
 
 exec "$@"
