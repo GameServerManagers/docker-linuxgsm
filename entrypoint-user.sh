@@ -26,12 +26,12 @@ if [ -z "$(ls -A -- "serverfiles" 2> /dev/null)" ]; then
   install=1
 else
   # Donate to display logo
-  exec ./${GAMESERVER} donate
+  ./${GAMESERVER} donate
 fi
 echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
-nohup watch -n "${UPDATE_CHECK}" exec ./${GAMESERVER} update > /dev/null 2>&1 &
+nohup watch -n "${UPDATE_CHECK}" ./${GAMESERVER} update > /dev/null 2>&1 &
 echo -e "update will check every ${UPDATE_CHECK} minutes"
 
 # Update game server
