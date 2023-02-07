@@ -1,5 +1,5 @@
 #!/bin/bash
-export HOME="/home/${USERNAME}"
+export HOME="/${USERNAME}"
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""
