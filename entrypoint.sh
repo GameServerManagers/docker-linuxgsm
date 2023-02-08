@@ -42,7 +42,7 @@ echo -e ""
 echo -e "Check Permissions"
 echo -e "================================="
 echo -e "setting UID to ${UID}"
-usermod -u ${UID} linuxgsm > /dev/null 2>&1
+usermod -u ${UID} -m -d /linuxgsm linuxgsm > /dev/null 2>&1
 echo -e "setting GID to ${GID}"
 groupmod -g ${GID} linuxgsm
 echo -e "updating permissions"
