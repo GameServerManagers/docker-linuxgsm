@@ -25,7 +25,7 @@ if [ -z "$(ls -A -- "serverfiles" 2> /dev/null)" ]; then
   install=1
 else
   # Donate to display logo
-  ./${GAMESERVER} donate
+  ./${GAMESERVER} sponsor
 fi
 echo -e ""
 echo -e "Starting Update Checks"
