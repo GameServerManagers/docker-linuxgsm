@@ -49,6 +49,7 @@ echo -e "updating permissions"
 find /linuxgsm -user ${UID} -exec chown -h linuxgsm {} \;
 find /linuxgsm -group ${GID} -exec chgrp -h linuxgsm {} \;
 chown -R ${USERNAME}:${USERNAME} /linuxgsm
+export HOME=/home/docker
 
 echo -e ""
 echo -e "Switch to user ${USERNAME}"
