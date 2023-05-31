@@ -1,9 +1,9 @@
-#!/usr/bin/with-contenv bash
+#!/bin/bash
 
 exit_handler() {
   # Execute the shutdown commands
   echo -e "stopping ${GAMESERVER}"
-  exec s6-setuidgid ${USERNAME} ./${GAMESERVER} stop
+  exec gosu ${USERNAME} ./${GAMESERVER} stop
   exitcode=$?
   exit ${exitcode}
 }
@@ -53,4 +53,4 @@ chown -R ${USERNAME}:${USERNAME} /linuxgsm
 echo -e ""
 echo -e "Switch to user ${USERNAME}"
 echo -e "================================="
-exec s6-setuidgid ${USERNAME} /linuxgsm/entrypoint-user.sh
+exec gosu ${USERNAME} /linuxgsm/entrypoint-user.sh
