@@ -106,11 +106,11 @@ RUN echo "**** Get LinuxGSM Modules ****" \
   && git clone --filter=blob:none --no-checkout --sparse https://github.com/GameServerManagers/LinuxGSM.git \
   && cd LinuxGSM \
   && git sparse-checkout set --cone \
-  && git sparse-checkout set lgsm/functions \
+  && git sparse-checkout set lgsm/modules \
   && git checkout ${LGSM_GITHUBBRANCH} \
-  && mkdir -p /linuxgsm/lgsm/functions \
-  && mv lgsm/functions/* /linuxgsm/lgsm/functions \
-  && chmod +x /linuxgsm/lgsm/functions/* \
+  && mkdir -p /linuxgsm/lgsm/modules \
+  && mv lgsm/modules/* /linuxgsm/lgsm/modules \
+  && chmod +x /linuxgsm/lgsm/modules/* \
   && rm -rf /linuxgsm/LinuxGSM \
   && chown -R $USERNAME:$USERNAME /linuxgsm
 

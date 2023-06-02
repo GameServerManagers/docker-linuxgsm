@@ -10,10 +10,10 @@ fi
 # Clear functions directory if not master
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
   echo -e "not master branch, clearing functions directory"
-  rm -rf /linuxgsm/lgsm/functions/*
-elif [ -d "/linuxgsm/lgsm/functions" ]; then
+  rm -rf /linuxgsm/lgsm/modules/*
+elif [ -d "/linuxgsm/lgsm/modules" ]; then
   echo -e "ensure all functions are executable"
-  chmod +x /linuxgsm/lgsm/functions/*
+  chmod +x /linuxgsm/lgsm/modules/*
 fi
 
 # Install game server
