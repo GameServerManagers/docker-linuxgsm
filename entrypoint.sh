@@ -3,7 +3,7 @@
 exit_handler() {
   # Execute the shutdown commands
   echo -e "stopping ${GAMESERVER}"
-  exec gosu ${USERNAME} ./${GAMESERVER} stop
+  exec gosu "${USERNAME}" ./${GAMESERVER} stop
   exitcode=$?
   exit ${exitcode}
 }
@@ -27,6 +27,9 @@ echo -e ""
 echo -e "LGSM_GITHUBUSER: ${LGSM_GITHUBUSER}"
 echo -e "LGSM_GITHUBREPO: ${LGSM_GITHUBREPO}"
 echo -e "LGSM_GITHUBBRANCH: ${LGSM_GITHUBBRANCH}"
+echo -e "LGSM_LOGDIR: ${LGSM_LOGDIR}"
+echo -e "LGSM_SERVERFILES: ${LGSM_SERVERFILES}"
+echo -e "LGSM_CONFIG: ${LGSM_CONFIG}"
 
 echo -e ""
 echo -e "Initalising"
@@ -35,23 +38,24 @@ echo -e "=======================================================================
 export LGSM_GITHUBUSER=${LGSM_GITHUBUSER}
 export LGSM_GITHUBREPO=${LGSM_GITHUBREPO}
 export LGSM_GITHUBBRANCH=${LGSM_GITHUBBRANCH}
+export LGSM_LOGDIR=${LGSM_LOGDIR}
+export LGSM_SERVERFILES=${LGSM_SERVERFILES}
+export LGSM_CONFIG=${LGSM_CONFIG}
 
-cd /linuxgsm || exit
+cd /app || exit
 
 echo -e ""
 echo -e "Check Permissions"
 echo -e "================================="
 echo -e "setting UID to ${UID}"
-usermod -u ${UID} -m -d /linuxgsm linuxgsm > /dev/null 2>&1
+usermod -u "${UID}" -m -d /data linuxgsm > /dev/null 2>&1
 echo -e "setting GID to ${GID}"
-groupmod -g ${GID} linuxgsm
+groupmod -g "${GID}" linuxgsm
 echo -e "updating permissions"
-find /linuxgsm -user ${UID} -exec chown -h linuxgsm {} \;
-find /linuxgsm -group ${GID} -exec chgrp -h linuxgsm {} \;
-chown -R ${USERNAME}:${USERNAME} /linuxgsm
-export HOME=/home/linuxgsm
+chown -R "${USERNAME}":"${USERNAME}" /data
+export HOME=/data
 
 echo -e ""
 echo -e "Switch to user ${USERNAME}"
 echo -e "================================="
-exec gosu ${USERNAME} /linuxgsm/entrypoint-user.sh
+exec gosu "${USERNAME}" /app/entrypoint-user.sh

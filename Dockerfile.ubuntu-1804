@@ -11,7 +11,10 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM=xterm
 ENV LGSM_GITHUBUSER=GameServerManagers
 ENV LGSM_GITHUBREPO=LinuxGSM
-ENV LGSM_GITHUBBRANCH=develop
+ENV LGSM_GITHUBBRANCH=hotfix/v23.3.5
+ENV LGSM_LOGDIR=/data/log
+ENV LGSM_SERVERFILES=/data/serverfiles
+ENV LGSM_CONFIG=/data/config-lgsm
 ENV GAMESERVER=jc2server
 ENV UPDATE_CHECK=1800
 ENV USERNAME=linuxgsm
@@ -67,7 +70,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
 
 # Install Node.js
 RUN echo "**** Install Node.js ****" \
-  && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+  && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
   && apt-get update \
   && apt-get install -y nodejs \
   && apt-get -y autoremove \
@@ -80,10 +83,11 @@ RUN echo "**** Install Node.js ****" \
 RUN echo "**** Install GameDig ****" \
   && npm install -g gamedig
 
-WORKDIR /linuxgsm
+WORKDIR /app
 
 ## Add linuxgsm user
 RUN echo "**** Add linuxgsm user ****" \
+  && mkdir /data \
   # Create the user
   && groupadd --gid $GID $USERNAME \
   && useradd --uid $UID --gid $GID -m $USERNAME \
@@ -91,14 +95,13 @@ RUN echo "**** Add linuxgsm user ****" \
   # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
   && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
   && chmod 0440 /etc/sudoers.d/$USERNAME \
-  && chown $USERNAME:$USERNAME /home/$USERNAME
+  && chown $USERNAME:$USERNAME /data
 
-HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /linuxgsm/entrypoint-healthcheck.sh || exit 1
+HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /app/entrypoint-healthcheck.sh || exit 1
 
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
   && set -ex \
-  && mkdir -p /linuxgsm/lgsm \
   && wget -O linuxgsm.sh "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/linuxgsm.sh" \
   && chmod +x linuxgsm.sh
 
@@ -106,17 +109,21 @@ RUN echo "**** Get LinuxGSM Modules ****" \
   && git clone --filter=blob:none --no-checkout --sparse https://github.com/GameServerManagers/LinuxGSM.git \
   && cd LinuxGSM \
   && git sparse-checkout set --cone \
-  && git sparse-checkout set lgsm/functions \
+  && git sparse-checkout set lgsm/modules \
   && git checkout ${LGSM_GITHUBBRANCH} \
-  && mkdir -p /linuxgsm/lgsm/functions \
-  && mv lgsm/functions/* /linuxgsm/lgsm/functions \
-  && chmod +x /linuxgsm/lgsm/functions/* \
-  && rm -rf /linuxgsm/LinuxGSM \
-  && chown -R $USERNAME:$USERNAME /linuxgsm
+  && mkdir -p /app/lgsm/modules \
+  && mv lgsm/modules/* /app/lgsm/modules \
+  && chmod +x /app/lgsm/modules/* \
+  && cd ../ \
+  && rm -rf LinuxGSM \
+  && chown -R $USERNAME:$USERNAME /app
 
-COPY entrypoint.sh /linuxgsm/entrypoint.sh
-COPY entrypoint-user.sh /linuxgsm/entrypoint-user.sh
-COPY entrypoint-healthcheck.sh /linuxgsm/entrypoint-healthcheck.sh
+ARG CACHEBUST=1
+RUN echo "$CACHEBUST"
+
+COPY entrypoint.sh /app/entrypoint.sh
+COPY entrypoint-user.sh /app/entrypoint-user.sh
+COPY entrypoint-healthcheck.sh /app/entrypoint-healthcheck.sh
 
 RUN date > /build-time.txt
 
