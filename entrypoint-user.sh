@@ -50,12 +50,4 @@ sleep 5
 sleep 2
 echo -e "Tail log files"
 echo -e "================================="
-
-echo "DOLLAR0 $0"
-echo "DOLLAR1 $1"
-if [ -n "$1" ]; then
-  exec "$@"
-else
-  tail -F log/*/*.log
-fi
-exec "$@"
+tail -F log/*/*.log
