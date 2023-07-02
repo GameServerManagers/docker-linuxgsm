@@ -17,7 +17,7 @@ elif [ -d "/app/lgsm/modules" ]; then
 fi
 
 # Install game server
-if [ -z "$(ls -A -- "serverfiles" 2> /dev/null)" ]; then
+if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
   echo -e ""
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
