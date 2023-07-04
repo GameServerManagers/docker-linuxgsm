@@ -1,4 +1,17 @@
 #!/bin/bash
+
+exit_handler() {
+  # Execute the shutdown commands
+  echo -e "stopping ${GAMESERVER}"
+  exec gosu "${USERNAME}" ./"${GAMESERVER}" stop
+  exitcode=$?
+  exit ${exitcode}
+}
+
+# Exit trap
+echo -e "Loading exit handler"
+trap exit_handler SIGQUIT SIGINT SIGTERM
+
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""
@@ -24,6 +37,7 @@ if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
   ./"${GAMESERVER}" auto-install
   install=1
 else
+  echo -e ""
   # Sponsor to display LinuxGSM logo
   ./"${GAMESERVER}" sponsor
 fi

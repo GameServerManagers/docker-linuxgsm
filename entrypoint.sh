@@ -3,7 +3,7 @@
 exit_handler() {
   # Execute the shutdown commands
   echo -e "stopping ${GAMESERVER}"
-  exec gosu "${USERNAME}" ./${GAMESERVER} stop
+  exec gosu "${USERNAME}" ./"${GAMESERVER}" stop
   exitcode=$?
   exit ${exitcode}
 }
@@ -11,6 +11,7 @@ exit_handler() {
 # Exit trap
 echo -e "Loading exit handler"
 trap exit_handler SIGQUIT SIGINT SIGTERM
+
 DISTRO="$(grep "PRETTY_NAME" /etc/os-release | awk -F = '{gsub(/"/,"",$2);print $2}')"
 echo -e ""
 echo -e "Welcome to the LinuxGSM"
