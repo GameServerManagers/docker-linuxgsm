@@ -1,16 +1,16 @@
 #!/bin/bash
 
-exit_handler() {
+exit_handler_user() {
   # Execute the shutdown commands
-  echo -e "stopping ${GAMESERVER}"
-  exec gosu "${USERNAME}" ./"${GAMESERVER}" stop
+  echo -e "Stopping ${GAMESERVER}"
+  ./"${GAMESERVER}" stop
   exitcode=$?
   exit ${exitcode}
 }
 
 # Exit trap
 echo -e "Loading exit handler"
-trap exit_handler SIGQUIT SIGINT SIGTERM
+trap exit_handler_user SIGQUIT SIGINT SIGTERM
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
@@ -64,4 +64,5 @@ sleep 5
 sleep 2
 echo -e "Tail log files"
 echo -e "================================="
-tail -F log/*/*.log
+tail -F log/*/*.log &
+wait

@@ -2,7 +2,7 @@
 
 exit_handler() {
   # Execute the shutdown commands
-  echo -e "stopping ${GAMESERVER}"
+  echo -e "Stopping ${GAMESERVER}"
   exec gosu "${USERNAME}" ./"${GAMESERVER}" stop
   exitcode=$?
   exit ${exitcode}
@@ -59,4 +59,5 @@ export HOME=/data
 echo -e ""
 echo -e "Switch to user ${USERNAME}"
 echo -e "================================="
-exec gosu "${USERNAME}" /app/entrypoint-user.sh
+exec gosu "${USERNAME}" /app/entrypoint-user.sh &
+wait
