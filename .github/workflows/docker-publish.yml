@@ -6,6 +6,7 @@ on:
     branches: "main"
     paths:
       - Dockerfile*
+      - entrypoint*
   schedule:
     - cron: "0 2 * * 6"
 
