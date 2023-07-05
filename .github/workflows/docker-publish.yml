@@ -1,5 +1,4 @@
 name: Docker Publish
-
 on:
   workflow_dispatch:
   push:
