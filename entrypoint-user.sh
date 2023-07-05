@@ -64,5 +64,5 @@ sleep 5
 sleep 2
 echo -e "Tail log files"
 echo -e "================================="
-tail -F log/*/*.log &
+tail -F "${logdir}/*/*.log" &
 wait
