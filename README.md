@@ -1,6 +1,7 @@
 # LinuxGSM Docker Image
 
-> Note this is the base LinuxGSM image. For full game servers use <a href="https://github.com/GameServerManagers/docker-gameserver">docker-gameserver</a>
+## This is the base LinuxGSM image only.
+## Use <a href="https://github.com/GameServerManagers/docker-gameserver">docker-gameserver</a> for full game servers
 
 <p align="center">
   <a href="https://linuxgsm.com"><img src="https://user-images.githubusercontent.com/4478206/197897104-bb718d2e-09a0-4f83-8e86-c829044750a9.jpg" alt="LinuxGSM"></a>
@@ -13,7 +14,7 @@
 
 ## About
 
-LinuxGSM is a command-line tool for quick, simple deployment and management of Linux dedicated game servers. This container image builds daily and is available on [Docker Hub](https://hub.docker.com/r/gameservermanagers/linuxgsm) as well as [GitHub Container Registry](https://github.com/GameServerManagers/docker-linuxgsm/pkgs/container/linuxgsm).
+LinuxGSM is a command-line tool for quick, simple deployment and management of Linux dedicated game servers. This container image builds weekly and is available on [Docker Hub](https://hub.docker.com/r/gameservermanagers/linuxgsm) as well as [GitHub Container Registry](https://github.com/GameServerManagers/docker-linuxgsm/pkgs/container/linuxgsm).
 
 ## Tags
 
