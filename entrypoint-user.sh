@@ -24,6 +24,7 @@ fi
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
   echo -e "not master branch, clearing modules directory"
   rm -rf /app/lgsm/modules/*
+  ./"${GAMESERVER}" update-lgsm
 elif [ -d "/app/lgsm/modules" ]; then
   echo -e "ensure all modules are executable"
   chmod +x /app/lgsm/modules/*
