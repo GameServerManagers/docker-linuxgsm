@@ -3,7 +3,7 @@
 exit_handler() {
   # Execute the shutdown commands
   echo -e "Stopping ${GAMESERVER}"
-  exec gosu "${USERNAME}" ./"${GAMESERVER}" stop
+  exec gosu "${USER}" ./"${GAMESERVER}" stop
   exitcode=$?
   exit ${exitcode}
 }
@@ -21,7 +21,7 @@ echo -e "BUILD TIME: $(cat /build-time.txt)"
 echo -e "GAMESERVER: ${GAMESERVER}"
 echo -e "DISTRO: ${DISTRO}"
 echo -e ""
-echo -e "USER: ${USERNAME}"
+echo -e "USER: ${USER}"
 echo -e "UID: ${UID}"
 echo -e "GID: ${GID}"
 echo -e ""
@@ -53,11 +53,11 @@ usermod -u "${UID}" -m -d /data linuxgsm > /dev/null 2>&1
 echo -e "setting GID to ${GID}"
 groupmod -g "${GID}" linuxgsm
 echo -e "updating permissions"
-chown -R "${USERNAME}":"${USERNAME}" /data
+chown -R "${USER}":"${USER}" /data
 export HOME=/data
 
 echo -e ""
-echo -e "Switch to user ${USERNAME}"
+echo -e "Switch to user ${USER}"
 echo -e "================================="
-exec gosu "${USERNAME}" /app/entrypoint-user.sh &
+exec gosu "${USER}" /app/entrypoint-user.sh &
 wait

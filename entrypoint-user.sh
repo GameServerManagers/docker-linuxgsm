@@ -12,9 +12,6 @@ exit_handler_user() {
 echo -e "Loading exit handler"
 trap exit_handler_user SIGQUIT SIGINT SIGTERM
 
-# Define ${USER} as missing in docker container
-USER="${USERNAME}"
-
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""

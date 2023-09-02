@@ -17,7 +17,7 @@ ENV LGSM_SERVERFILES=/data/serverfiles
 ENV LGSM_CONFIG=/data/config-lgsm
 ENV GAMESERVER=jc2server
 ENV UPDATE_CHECK=1800
-ENV USERNAME=linuxgsm
+ENV USER=linuxgsm
 ENV UID=1000
 ENV GID=1000
 
@@ -70,9 +70,13 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
 
 # Install Node.js
 RUN echo "**** Install Node.js ****" \
-  && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+  && set -uex \
+  && mkdir -p /etc/apt/keyrings \
+  && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+  && NODE_MAJOR=16 \
+  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
   && apt-get update \
-  && apt-get install -y nodejs \
+  && apt-get install nodejs -y \
   && apt-get -y autoremove \
   && apt-get -y clean \
   && rm -rf /var/lib/apt/lists/* \
@@ -89,13 +93,13 @@ WORKDIR /app
 RUN echo "**** Add linuxgsm user ****" \
   && mkdir /data \
   # Create the user
-  && groupadd --gid $GID $USERNAME \
-  && useradd --uid $UID --gid $GID -m $USERNAME \
+  && groupadd --gid $GID $USER \
+  && useradd --uid $UID --gid $GID -m $USER \
   #
   # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-  && chmod 0440 /etc/sudoers.d/$USERNAME \
-  && chown $USERNAME:$USERNAME /data
+  && echo $USER ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER \
+  && chmod 0440 /etc/sudoers.d/$USER \
+  && chown $USER:$USER /data
 
 HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /app/entrypoint-healthcheck.sh || exit 1
 
@@ -116,7 +120,7 @@ RUN echo "**** Get LinuxGSM Modules ****" \
   && chmod +x /app/lgsm/modules/* \
   && cd ../ \
   && rm -rf LinuxGSM \
-  && chown -R $USERNAME:$USERNAME /app
+  && chown -R $USER:$USER /app
 
 ARG CACHEBUST=1
 RUN echo "$CACHEBUST"

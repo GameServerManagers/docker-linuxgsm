@@ -1,2 +1,2 @@
 #!/bin/bash
-exec gosu "${USERNAME}" /app/*server monitor || exit 1
+exec gosu "${USER}" /app/*server monitor || exit 1
