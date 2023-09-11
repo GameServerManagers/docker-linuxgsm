@@ -55,6 +55,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   tmux \
   unzip \
   util-linux \
+  uuid-runtime \
   wget \
   xz-utils \
   # Docker Extras
