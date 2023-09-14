@@ -54,8 +54,10 @@ echo -e "setting UID to ${UID}"
 usermod -u "${UID}" -m -d /data linuxgsm > /dev/null 2>&1
 echo -e "setting GID to ${GID}"
 groupmod -g "${GID}" linuxgsm
-echo -e "updating permissions"
+echo -e "updating permissions for /data"
 chown -R "${USER}":"${USER}" /data
+echo -e "updating permissions for /app"
+chown -R "${USER}":"${USER}" /app
 export HOME=/data
 
 echo -e ""
