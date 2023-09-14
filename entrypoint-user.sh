@@ -46,7 +46,8 @@ echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
 nohup watch -n "${UPDATE_CHECK}" ./"${GAMESERVER}" update > /dev/null 2>&1 &
-echo -e "update will check every ${UPDATE_CHECK} minutes"
+minutes=$((UPDATE_CHECK / 60))
+echo -e "update will check every ${minutes} minutes"
 
 # Update game server
 if [ -z "${install}" ]; then
