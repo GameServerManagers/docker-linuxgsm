@@ -14,10 +14,9 @@ trap exit_handler_user SIGQUIT SIGINT SIGTERM
 
 execute_hook_directory() {
   for f in $1; do
-    bash "$f"
-    if [ $? -ne 0 ]
+    if ! bash $f
     then
-      echo "Failed running hook \"$f\". exit code $?"
+      echo "Failed running hook \"$f\""
       exit 1
     fi
   done
