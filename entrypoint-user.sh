@@ -12,6 +12,17 @@ exit_handler_user() {
 echo -e "Loading exit handler"
 trap exit_handler_user SIGQUIT SIGINT SIGTERM
 
+execute_hook_directory() {
+  for f in $1; do
+    bash "$f"
+    if [ $? -ne 0 ]
+    then
+      echo "Failed running hook \"$f\". exit code $?"
+      exit 1
+    fi
+  done
+}
+
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
   echo -e ""
@@ -28,6 +39,14 @@ if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
 elif [ -d "/app/lgsm/modules" ]; then
   echo -e "ensure all modules are executable"
   chmod +x /app/lgsm/modules/*
+fi
+
+# Run pre-install scripts
+if [ -d "/app/hooks/pre-install" ]; then
+  echo -e ""
+  echo -e "Executing pre-install hooks"
+  echo -e "================================="
+  execute_hook_directory "/app/hooks/pre-install/*.sh"
 fi
 
 # Install game server
@@ -55,6 +74,14 @@ if [ -z "${install}" ]; then
   echo -e "Checking for Update ${GAMESERVER}"
   echo -e "================================="
   ./"${GAMESERVER}" update
+fi
+
+# Run pre-install scripts
+if [ -d "/app/hooks/post-install" ]; then
+  echo -e ""
+  echo -e "Executing post-install hooks"
+  echo -e "================================="
+  execute_hook_directory "/app/hooks/post-install/*.sh"
 fi
 
 echo -e ""
