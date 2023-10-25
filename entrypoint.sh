@@ -47,6 +47,9 @@ export LGSM_CONFIG=${LGSM_CONFIG}
 
 cd /app || exit
 
+# start cron
+cron
+
 echo -e ""
 echo -e "Check Permissions"
 echo -e "================================="
