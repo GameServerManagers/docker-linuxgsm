@@ -42,12 +42,12 @@ else
   # Sponsor to display LinuxGSM logo
   ./"${GAMESERVER}" sponsor
 fi
+
 echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
-nohup watch -n "${UPDATE_CHECK}" ./"${GAMESERVER}" update > /dev/null 2>&1 &
-minutes=$((UPDATE_CHECK / 60))
-echo -e "update will check every ${minutes} minutes"
+echo -e "* */${UPDATE_CHECK} * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
+echo -e "update will check every ${UPDATE_CHECK} minutes"
 
 # Update game server
 if [ -z "${install}" ]; then
