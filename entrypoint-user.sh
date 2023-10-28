@@ -30,6 +30,12 @@ elif [ -d "/app/lgsm/modules" ]; then
   chmod +x /app/lgsm/modules/*
 fi
 
+# Enable developer mode
+if [ "${LGSM_DEV}" == "true" ]; then
+  echo -e "developer mode enabled"
+  ./"${GAMESERVER}" developer
+fi
+
 # Install game server
 if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
   echo -e ""
