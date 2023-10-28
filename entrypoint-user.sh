@@ -30,6 +30,15 @@ elif [ -d "/app/lgsm/modules" ]; then
   chmod +x /app/lgsm/modules/*
 fi
 
+# If a command was passed in, run it and exit
+if [ "$1" != "" ]; then
+    echo -e ""
+    echo -e "Running ${GAMESERVER}"
+    echo -e "================================="
+    ./"${GAMESERVER}" "$1"
+    exit 0
+fi
+
 # Install game server
 if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
   echo -e ""
