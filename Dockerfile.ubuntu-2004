@@ -103,7 +103,7 @@ RUN echo "**** Add linuxgsm user ****" \
   && chmod 0440 /etc/sudoers.d/$USER \
   && chown $USER:$USER /data
 
-HEALTHCHECK --interval=1m --timeout=1m --start-period=2m --retries=1 CMD /app/entrypoint-healthcheck.sh || exit 1
+HEALTHCHECK --interval=1m --timeout=1m --start-period=5m --retries=1 CMD /app/entrypoint-healthcheck.sh || exit 1
 
 ## Download linuxgsm.sh
 RUN echo "**** Download linuxgsm.sh ****" \
