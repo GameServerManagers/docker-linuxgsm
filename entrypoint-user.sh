@@ -52,7 +52,7 @@ fi
 echo -e ""
 echo -e "Starting Update Checks"
 echo -e "================================="
-echo -e "* */${UPDATE_CHECK} * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
+echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
 echo -e "update will check every ${UPDATE_CHECK} minutes"
 
 # Update game server
