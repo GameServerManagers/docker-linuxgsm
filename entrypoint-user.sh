@@ -20,6 +20,15 @@ if [ ! -f "${GAMESERVER}" ]; then
   ./linuxgsm.sh "${GAMESERVER}"
 fi
 
+# Symlink LGSM_CONFIG to /app/lgsm/config-lgsm
+if [ ! -d "/app/lgsm/config-lgsm" ]; then
+  echo -e ""
+  echo -e "creating symlink for ${LGSM_CONFIG}"
+  echo -e "================================="
+  ln -s "${LGSM_CONFIG}" "/app/lgsm/config-lgsm"
+fi
+
+
 # Clear modules directory if not master
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
   echo -e "not master branch, clearing modules directory"
