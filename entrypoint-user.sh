@@ -28,6 +28,14 @@ if [ ! -d "/app/lgsm/config-lgsm" ]; then
   ln -s "${LGSM_CONFIG}" "/app/lgsm/config-lgsm"
 fi
 
+# Symlink  LGSM_SERVERCFG to /app/serverfiles
+if [ ! -d "/app/serverfiles" ]; then
+  echo -e ""
+  echo -e "creating symlink for ${LGSM_SERVERCFG}"
+  echo -e "================================="
+  ln -s "${LGSM_SERVERCFG}" "/app/serverfiles"
+fi
+
 
 # Clear modules directory if not master
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
