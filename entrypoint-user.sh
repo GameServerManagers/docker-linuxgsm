@@ -33,7 +33,7 @@ if [ ! -d "/app/serverfiles" ]; then
   echo -e ""
   echo -e "creating symlink for ${LGSM_SERVERCFG}"
   echo -e "================================="
-  ln -s "${LGSM_SERVERCFG}" "/app/serverfiles"
+  ln -s "${LGSM_SERVERFILES}" "/app/serverfiles"
 fi
 
 
