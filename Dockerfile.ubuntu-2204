@@ -89,7 +89,10 @@ RUN echo "**** Install Node.js ****" \
 
 # Install GameDig https://docs.linuxgsm.com/requirements/gamedig
 RUN echo "**** Install GameDig ****" \
-  && npm install -g gamedig
+  && npm install -g gamedig@4.3.1
+WORKDIR /app/lgsm \
+  wget -N --no-check-certificate "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/package.json" \
+  && npm install
 
 WORKDIR /app
 
