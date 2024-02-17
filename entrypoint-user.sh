@@ -44,6 +44,16 @@ if [ ! -d "/app/log" ]; then
   ln -s "${LGSM_LOGDIR}" "/app/log"
 fi
 
+# npm install in /app/lgsm
+if [ -f "/app/lgsm/package.json" ]; then
+  echo -e ""
+  echo -e "npm install in /app/lgsm"
+  echo -e "================================="
+  cd /app/lgsm || exit
+  npm install
+  cd /app || exit
+fi
+
 # Clear modules directory if not master
 if [ "${LGSM_GITHUBBRANCH}" != "master" ]; then
   echo -e "not master branch, clearing modules directory"
