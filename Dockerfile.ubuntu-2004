@@ -51,6 +51,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   lib32gcc-s1 \
   lib32stdc++6 \
   netcat \
+  pigz \
   python3 \
   sudo \
   tar \
@@ -77,7 +78,7 @@ RUN echo "**** Install Node.js ****" \
   && mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
   && NODE_MAJOR=20 \
-  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+  && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
   && apt-get update \
   && apt-get install nodejs -y \
   && apt-get -y autoremove \
@@ -89,7 +90,7 @@ RUN echo "**** Install Node.js ****" \
 
 # Install GameDig https://docs.linuxgsm.com/requirements/gamedig
 RUN echo "**** Install GameDig ****" \
-  && npm install -g gamedig@4.3.1
+  && npm install -g gamedig@5.0.0-beta.2
 WORKDIR /app/lgsm \
   wget -N --no-check-certificate "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/package.json" \
   && npm install

@@ -19,5 +19,6 @@ LinuxGSM is a command-line tool for quick, simple deployment and management of L
 ## Tags
 
 - `latest`, `ubuntu` - Latest Ubuntu LTS release
+- `ubuntu-24.04` - Ubuntu 24.04 LTS 'Noble Numbat'
 - `ubuntu-22.04` - Ubuntu 22.04 LTS 'Jammy Jackalope'
 - `ubuntu-20.04` - Ubuntu 20.04 LTS 'Focal Fossa'
