@@ -18,6 +18,7 @@ ENV LGSM_DATADIR=/data/data
 ENV LGSM_CONFIG=/data/config-lgsm
 ENV LGSM_DEV=false
 ENV GAMESERVER=jc2server
+ENV VALIDATE_ON_START=false
 ENV UPDATE_CHECK=60
 ENV USER=linuxgsm
 ENV UID=1001
@@ -91,7 +92,7 @@ RUN echo "**** Install Node.js ****" \
 
 # Install GameDig https://docs.linuxgsm.com/requirements/gamedig
 RUN echo "**** Install GameDig ****" \
-  && npm install -g gamedig@5.0.0
+  && npm install -g gamedig@5
 
 WORKDIR /app
 

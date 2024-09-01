@@ -89,12 +89,18 @@ echo -e "================================="
 echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
 echo -e "update will check every ${UPDATE_CHECK} minutes"
 
-# Update game server
+# Update or validate game server
 if [ -z "${install}" ]; then
   echo -e ""
-  echo -e "Checking for Update ${GAMESERVER}"
-  echo -e "================================="
-  ./"${GAMESERVER}" update
+    if [ "${VALIDATE_ON_START,,}" = "true" ]; then
+    echo -e "Validating ${GAMESERVER}"
+    echo -e "================================="
+    ./"${GAMESERVER}" validate
+  else
+    echo -e "Checking for Update ${GAMESERVER}"
+    echo -e "================================="
+    ./"${GAMESERVER}" update
+  fi
 fi
 
 echo -e ""
