@@ -44,6 +44,14 @@ if [ ! -d "/app/log" ]; then
   ln -s "${LGSM_LOGDIR}" "/app/log"
 fi
 
+# Symlink LGSM_DATADIR to /app/lgsm/data
+if [ ! -d "/app/lgsm/data" ]; then
+  echo -e ""
+  echo -e "creating symlink for ${LGSM_DATADIR}"
+  echo -e "================================="
+  ln -s "${LGSM_DATADIR}" "/app/lgsm/data"
+fi
+
 # npm install in /app/lgsm
 if [ -f "/app/lgsm/package.json" ]; then
   echo -e ""
