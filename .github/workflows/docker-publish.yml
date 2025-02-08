@@ -95,8 +95,6 @@ jobs:
             gameservermanagers/linuxgsm
             ghcr.io/gameservermanagers/linuxgsm
           tags: |
-            latest
-            ubuntu
             ubuntu-22.04
 
       - name: Build and push (Ubuntu 22.04)
@@ -146,8 +144,6 @@ jobs:
             gameservermanagers/linuxgsm
             ghcr.io/gameservermanagers/linuxgsm
           tags: |
-            latest
-            ubuntu
             ubuntu-20.04
 
       - name: Build and push (Ubuntu 20.04)
