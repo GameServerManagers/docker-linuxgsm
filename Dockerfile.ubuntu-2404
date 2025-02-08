@@ -4,7 +4,7 @@
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
 
-FROM gameservermanagers/steamcmd:ubuntu-24.04
+FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-24.04
 
 LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
 ENV DEBIAN_FRONTEND noninteractive
