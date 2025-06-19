@@ -45,6 +45,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   distro-info \
   file \
   git \
+  gnupg \
   gosu \
   gzip \
   hostname \
@@ -92,9 +93,6 @@ RUN echo "**** Install Node.js ****" \
 # Install GameDig https://docs.linuxgsm.com/requirements/gamedig
 RUN echo "**** Install GameDig ****" \
   && npm install -g gamedig@5
-WORKDIR /app/lgsm \
-  wget -N --no-check-certificate "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/${LGSM_GITHUBBRANCH}/package.json" \
-  && npm install
 
 WORKDIR /app
 
@@ -137,6 +135,9 @@ RUN echo "$CACHEBUST"
 COPY entrypoint.sh /app/entrypoint.sh
 COPY entrypoint-user.sh /app/entrypoint-user.sh
 COPY entrypoint-healthcheck.sh /app/entrypoint-healthcheck.sh
+
+## Ensure entrypoint scripts have execute permissions
+RUN chmod +x /app/entrypoint.sh /app/entrypoint-user.sh /app/entrypoint-healthcheck.sh
 
 RUN date > /build-time.txt
 

@@ -53,6 +53,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   lib32gcc-s1 \
   lib32stdc++6 \
   netcat \
+  pigz \
   python3 \
   sudo \
   tar \
@@ -134,6 +135,9 @@ RUN echo "$CACHEBUST"
 COPY entrypoint.sh /app/entrypoint.sh
 COPY entrypoint-user.sh /app/entrypoint-user.sh
 COPY entrypoint-healthcheck.sh /app/entrypoint-healthcheck.sh
+
+## Ensure entrypoint scripts have execute permissions
+RUN chmod +x /app/entrypoint.sh /app/entrypoint-user.sh /app/entrypoint-healthcheck.sh
 
 RUN date > /build-time.txt
 
