@@ -63,6 +63,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   uuid-runtime \
   wget \
   xz-utils \
+  zstd \
   # Docker Extras
   iproute2 \
   iputils-ping \
