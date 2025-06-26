@@ -91,6 +91,18 @@ else
   ./"${GAMESERVER}" sponsor
 fi
 
+if [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
+  echo -e ""
+  echo -e "Starting Update Checks"
+  echo -e "================================="
+  echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
+  echo -e "update will check every ${UPDATE_CHECK} minutes"
+else
+  echo -e ""
+  echo -e "Update checks are disabled"
+  echo -e "================================="
+fi
+
 # Update or validate game server
 if [ -z "${install}" ]; then
   echo -e ""
