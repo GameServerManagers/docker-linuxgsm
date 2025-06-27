@@ -16,6 +16,7 @@ ENV LGSM_LOGDIR=/data/log
 ENV LGSM_SERVERFILES=/data/serverfiles
 ENV LGSM_DATADIR=/data/data
 ENV LGSM_CONFIG=/data/config-lgsm
+ENV LGSM_COMPRESSEDMAPSDIR=/data/Maps-Compressed
 ENV LGSM_DEV=false
 ENV GAMESERVER=jc2server
 ENV VALIDATE_ON_START=false
