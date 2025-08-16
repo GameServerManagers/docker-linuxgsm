@@ -1,6 +1,7 @@
 # LinuxGSM Base Docker Image
 
 ## This is the base LinuxGSM image only.
+
 ## Use <a href="https://github.com/GameServerManagers/docker-gameserver">docker-gameserver</a> for full game servers
 
 <p align="center">

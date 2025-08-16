@@ -106,7 +106,7 @@ fi
 # Update or validate game server
 if [ -z "${install}" ]; then
   echo -e ""
-    if [ "${VALIDATE_ON_START,,}" = "true" ]; then
+  if [ "${VALIDATE_ON_START,,}" = "true" ]; then
     echo -e "Validating ${GAMESERVER}"
     echo -e "================================="
     ./"${GAMESERVER}" validate
