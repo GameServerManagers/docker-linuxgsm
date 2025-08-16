@@ -1,7 +1,13 @@
 {
   "recommendations": [
+    "DavidAnson.vscode-markdownlint",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "github.vscode-github-actions"
+    "exiasr.hadolint",
+    "github.vscode-github-actions",
+    "GitHub.vscode-pull-request-github",
+    "ms-azuretools.vscode-containers",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one"
   ]
 }
