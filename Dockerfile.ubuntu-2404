@@ -5,8 +5,9 @@
 #
 
 FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-24.04
-## Remove ubuntu user added in 24.04 by default
-RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel -r ubuntu
+
+## Remove steam user from upstream base image if present
+RUN if id -u steam >/dev/null 2>&1; then userdel -r steam || true; fi
 
 LABEL maintainer="LinuxGSM <me@danielgibbs.co.uk>"
 ENV DEBIAN_FRONTEND noninteractive
