@@ -9,7 +9,8 @@
     "ghcr.io/devcontainers-extra/features/shellcheck:1": {},
     "ghcr.io/devcontainers-extra/features/yamllint:2": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/dhoeric/features/hadolint:1": {}
   },
   "customizations": {
     "vscode": {
@@ -17,6 +18,7 @@
         "DavidAnson.vscode-markdownlint",
         "editorconfig.editorconfig",
         "esbenp.prettier-vscode",
+        "exiasr.hadolint",
         "github.vscode-github-actions",
         "GitHub.vscode-pull-request-github",
         "ms-azuretools.vscode-containers",
