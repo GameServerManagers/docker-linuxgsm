@@ -110,7 +110,8 @@ if [ -z "${install}" ]; then
     echo -e "Validating ${GAMESERVER}"
     echo -e "================================="
     ./"${GAMESERVER}" validate
-  else
+  fi
+  if [ "${UPDATE_ON_START,,}" = "true" ]; then
     echo -e "Checking for Update ${GAMESERVER}"
     echo -e "================================="
     ./"${GAMESERVER}" update
