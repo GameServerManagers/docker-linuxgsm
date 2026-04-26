@@ -2,6 +2,10 @@
 
 exit_handler() {
   # Execute the shutdown commands
+  if ( ${LGSM_SAVE_CRONTAB} ) ; then
+      echo -e "Saving user ${USER} crontab"
+      crontab -u "${USER}" -l > "${LGSM_CRONTAB_SAVEPOINT}"
+  fi
   echo -e "Stopping ${GAMESERVER}"
   exec gosu "${USER}" ./"${GAMESERVER}" stop
   exitcode=$?
@@ -62,6 +66,7 @@ chown -R "${USER}":"${USER}" /data
 echo -e "updating permissions for /app"
 chown -R "${USER}":"${USER}" /app
 export HOME=/data
+export LGSM_CRONTAB_SAVEPOINT="${HOME}"/saved-crontab
 
 echo -e ""
 echo -e "Switch to user ${USER}"

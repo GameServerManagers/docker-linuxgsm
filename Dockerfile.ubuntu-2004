@@ -29,6 +29,7 @@ ENV UPDATE_CHECK=60
 ENV USER=linuxgsm
 ENV UID=1000
 ENV GID=1000
+ENV LGSM_SAVE_CRONTAB=false
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
