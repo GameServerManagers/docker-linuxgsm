@@ -1,170 +1,94 @@
 name: Docker Publish
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - Dockerfile*
+      - Dockerfile
   schedule:
     - cron: "0 1 * * 6"
 
 jobs:
-  build-ubuntu-2404:
-    name: Build Ubuntu 24.04
+  build:
+    name: Build Ubuntu ${{ matrix.version }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
       attestations: write
       id-token: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: "26.04"
+            tags: |
+              latest
+              ubuntu
+              ubuntu-26.04
+          - version: "24.04"
+            tags: ubuntu-24.04
+          - version: "22.04"
+            tags: ubuntu-22.04
+          - version: "20.04"
+            tags: ubuntu-20.04
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v4
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Login to Docker Hub
+      #   uses: docker/login-action@v4
+      #   with:
+      #     username: ${{ secrets.DOCKER_HUB_USERNAME }}
+      #     password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v4
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             gameservermanagers/linuxgsm
             ghcr.io/gameservermanagers/linuxgsm
-          tags: |
-            latest
-            ubuntu
-            ubuntu-24.04
+          tags: ${{ matrix.tags }}
 
-      - name: Build and push (Ubuntu 24.04)
-        uses: docker/build-push-action@v6
+      - name: Build and push (Ubuntu ${{ matrix.version }})
+        uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./Dockerfile.ubuntu-2404
+          file: ./Dockerfile
+          build-args: |
+            UBUNTU_VER=${{ matrix.version }}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  build-ubuntu-2204:
-    name: Build Ubuntu 22.04
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            gameservermanagers/linuxgsm
-            ghcr.io/gameservermanagers/linuxgsm
-          tags: |
-            ubuntu-22.04
-
-      - name: Build and push (Ubuntu 22.04)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.ubuntu-2204
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  build-ubuntu-2004:
-    name: Build Ubuntu 20.04
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            gameservermanagers/linuxgsm
-            ghcr.io/gameservermanagers/linuxgsm
-          tags: |
-            ubuntu-20.04
-
-      - name: Build and push (Ubuntu 20.04)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.ubuntu-2004
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  package-cleanup:
-    name: Cleanup Old GitHub Packages
-    needs: [build-ubuntu-2004, build-ubuntu-2204, build-ubuntu-2404]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete Package Versions
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: linuxgsm
-          package-type: container
-          min-versions-to-keep: 1
-          delete-only-untagged-versions: true
+  # package-cleanup:
+  #   name: Cleanup Old GitHub Packages
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Delete Package Versions
+  #       uses: actions/delete-package-versions@v5
+  #       with:
+  #         package-name: linuxgsm
+  #         package-type: container
+  #         min-versions-to-keep: 1
+  #         delete-only-untagged-versions: true

@@ -4,7 +4,9 @@
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
 
-FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-22.04
+ARG UBUNTU_VER=26.04
+
+FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-${UBUNTU_VER}
 
 USER root
 
@@ -58,7 +60,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   jq \
   lib32gcc-s1 \
   lib32stdc++6 \
-  netcat \
+  $(. /etc/os-release && case "$VERSION_ID" in "20.04"|"22.04") echo "netcat" ;; *) echo "netcat-openbsd" ;; esac) \
   pigz \
   python3 \
   sudo \
@@ -87,9 +89,9 @@ RUN echo "**** Install Node.js ****" \
   && mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
   && NODE_MAJOR=20 \
-  && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
   && apt-get update \
-  && apt-get install nodejs -y \
+  && apt-get install nodejs -y --no-install-recommends \
   && apt-get -y autoremove \
   && apt-get -y clean \
   && rm -rf /var/lib/apt/lists/* \
