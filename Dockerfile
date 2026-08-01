@@ -52,7 +52,6 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   bzip2 \
   ca-certificates \
   cpio \
-  cron \
   curl \
   distro-info \
   file \
