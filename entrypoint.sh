@@ -56,16 +56,26 @@ echo -e "================================="
 # The image ships one machine-id shared by every container built from it, and it
 # changes on each rebuild. Some game servers (e.g. Hytale) encrypt saved credentials
 # against it, so keep a per-install machine-id in /data that survives image updates.
-if grep -qxE '[0-9a-f]{32}' /data/.machine-id 2> /dev/null; then
+machineid=""
+if [ -f /data/.machine-id ]; then
+  read -r machineid < /data/.machine-id
+fi
+if [[ "${machineid}" =~ ^[0-9a-f]{32}$ ]]; then
   echo -e "using machine-id from /data/.machine-id"
 else
   echo -e "generating new machine-id in /data/.machine-id"
-  tr -d '-' < /proc/sys/kernel/random/uuid > /data/.machine-id
+  machineid="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+  if [[ ! "${machineid}" =~ ^[0-9a-f]{32}$ ]] || ! printf '%s\n' "${machineid}" > /data/.machine-id; then
+    echo -e "ERROR: unable to create /data/.machine-id"
+    exit 1
+  fi
 fi
-cat /data/.machine-id > /etc/machine-id
-if [ -d /var/lib/dbus ]; then
-  cat /data/.machine-id > /var/lib/dbus/machine-id
-fi
+for machineidfile in /etc/machine-id /var/lib/dbus/machine-id; do
+  if [ -d "$(dirname "${machineidfile}")" ] && ! printf '%s\n' "${machineid}" > "${machineidfile}"; then
+    echo -e "ERROR: unable to write ${machineidfile}"
+    exit 1
+  fi
+done
 
 echo -e ""
 echo -e "Check Permissions"
