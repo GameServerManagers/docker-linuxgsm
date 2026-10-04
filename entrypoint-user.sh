@@ -8,9 +8,12 @@ exit_handler_user() {
   exit ${exitcode}
 }
 
-# Exit trap
-echo -e "Loading exit handler"
-trap exit_handler_user SIGQUIT SIGINT SIGTERM
+# Exit trap (normal mode only: in single-command mode a signal should end the
+# command, not run stop)
+if [ "$#" -eq 0 ]; then
+  echo -e "Loading exit handler"
+  trap exit_handler_user SIGQUIT SIGINT SIGTERM
+fi
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then

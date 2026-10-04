@@ -1,13 +1,22 @@
 #!/bin/bash
 
 exit_handler() {
+  local signal="${1:-TERM}"
   # Single-command mode: pass the signal to the running command instead of
   # stopping a server that is not running
-  if [ "${singlecommand}" == "true" ] && [ -n "${childpid}" ]; then
-    echo -e "Interrupting ${GAMESERVER} command"
-    kill -TERM "${childpid}" 2> /dev/null
-    wait "${childpid}"
-    exit $?
+  if [ "${singlecommand}" == "true" ]; then
+    if [ -n "${childpid}" ]; then
+      echo -e "Interrupting ${GAMESERVER} command"
+      kill -s "${signal}" "${childpid}" 2> /dev/null
+      wait "${childpid}"
+      exit $?
+    fi
+    # Signal arrived before the command started
+    case "${signal}" in
+      INT) exit 130 ;;
+      QUIT) exit 131 ;;
+      *) exit 143 ;;
+    esac
   fi
   # Execute the shutdown commands
   echo -e "Stopping ${GAMESERVER}"
@@ -16,14 +25,16 @@ exit_handler() {
   exit ${exitcode}
 }
 
-# Exit trap
-echo -e "Loading exit handler"
-trap exit_handler SIGQUIT SIGINT SIGTERM
-
 singlecommand="false"
 if [ "$#" -gt 0 ]; then
   singlecommand="true"
 fi
+
+# Exit trap
+echo -e "Loading exit handler"
+trap 'exit_handler INT' SIGINT
+trap 'exit_handler QUIT' SIGQUIT
+trap 'exit_handler TERM' SIGTERM
 
 DISTRO="$(grep "PRETTY_NAME" /etc/os-release | awk -F = '{gsub(/"/,"",$2);print $2}')"
 echo -e ""
