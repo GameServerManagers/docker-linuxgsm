@@ -90,8 +90,8 @@ if [ "$#" -gt 0 ]; then
     echo -e "${GAMESERVER} is not installed yet. Start the container without a command to install it, or run auto-install."
     exit 1
   fi
-  ./"${GAMESERVER}" "$@"
-  exit $?
+  # exec so the command receives signals directly and its status is the exit status
+  exec ./"${GAMESERVER}" "$@"
 fi
 
 # Install game server

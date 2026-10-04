@@ -1,6 +1,14 @@
 #!/bin/bash
 
 exit_handler() {
+  # Single-command mode: pass the signal to the running command instead of
+  # stopping a server that is not running
+  if [ "${singlecommand}" == "true" ] && [ -n "${childpid}" ]; then
+    echo -e "Interrupting ${GAMESERVER} command"
+    kill -TERM "${childpid}" 2> /dev/null
+    wait "${childpid}"
+    exit $?
+  fi
   # Execute the shutdown commands
   echo -e "Stopping ${GAMESERVER}"
   exec gosu "${USER}" ./"${GAMESERVER}" stop
@@ -11,6 +19,11 @@ exit_handler() {
 # Exit trap
 echo -e "Loading exit handler"
 trap exit_handler SIGQUIT SIGINT SIGTERM
+
+singlecommand="false"
+if [ "$#" -gt 0 ]; then
+  singlecommand="true"
+fi
 
 DISTRO="$(grep "PRETTY_NAME" /etc/os-release | awk -F = '{gsub(/"/,"",$2);print $2}')"
 echo -e ""
@@ -94,4 +107,5 @@ echo -e ""
 echo -e "Switch to user ${USER}"
 echo -e "================================="
 exec gosu "${USER}" /app/entrypoint-user.sh "$@" &
-wait $!
+childpid=$!
+wait "${childpid}"
