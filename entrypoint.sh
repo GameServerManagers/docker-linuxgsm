@@ -51,6 +51,23 @@ cd /app || exit
 cron
 
 echo -e ""
+echo -e "Machine ID"
+echo -e "================================="
+# The image ships one machine-id shared by every container built from it, and it
+# changes on each rebuild. Some game servers (e.g. Hytale) encrypt saved credentials
+# against it, so keep a per-install machine-id in /data that survives image updates.
+if grep -qxE '[0-9a-f]{32}' /data/.machine-id 2> /dev/null; then
+  echo -e "using machine-id from /data/.machine-id"
+else
+  echo -e "generating new machine-id in /data/.machine-id"
+  tr -d '-' < /proc/sys/kernel/random/uuid > /data/.machine-id
+fi
+cat /data/.machine-id > /etc/machine-id
+if [ -d /var/lib/dbus ]; then
+  cat /data/.machine-id > /var/lib/dbus/machine-id
+fi
+
+echo -e ""
 echo -e "Check Permissions"
 echo -e "================================="
 echo -e "setting UID to ${UID}"
