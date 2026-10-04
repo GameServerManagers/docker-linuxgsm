@@ -91,7 +91,12 @@ else
   ./"${GAMESERVER}" sponsor
 fi
 
-if [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
+if ( "${LGSM_SAVE_CRONTAB}" ) && [ -e "${LGSM_CRONTAB_SAVEPOINT}" ] ; then
+  echo -e ""
+  echo -e "Found saved crontab, restoring"
+  echo -e "================================="
+  cat "${LGSM_CRONTAB_SAVEPOINT}" | crontab - || echo -e "Crontab is invalid, NOT restored!"
+elif [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
   echo -e ""
   echo -e "Starting Update Checks"
   echo -e "================================="
