@@ -7,6 +7,8 @@
 FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-24.04
 
 USER root
+# checkov:skip=CKV_DOCKER_8: entrypoint.sh must start as root (usermod, chown, machine-id) and drops to the linuxgsm user with gosu
+# checkov:skip=CKV2_DOCKER_1: sudo is installed on purpose so the linuxgsm user can install extra packages
 
 ## Remove steam user from upstream base image if present
 RUN if id -u steam >/dev/null 2>&1; then echo "Removing steam user from base image"; userdel -r steam || true; else echo "steam user not present"; fi
