@@ -58,7 +58,7 @@ echo -e "LGSM_DATADIR: ${LGSM_DATADIR}"
 echo -e "LGSM_CONFIG: ${LGSM_CONFIG}"
 
 echo -e ""
-echo -e "Initalising"
+echo -e "Initialising"
 echo -e "================================================================================"
 
 export LGSM_GITHUBUSER=${LGSM_GITHUBUSER}
