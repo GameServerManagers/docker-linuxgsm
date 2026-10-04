@@ -23,3 +23,17 @@ LinuxGSM is a command-line tool for quick, simple deployment and management of L
 - `ubuntu-24.04` - Ubuntu 24.04 LTS 'Noble Numbat'
 - `ubuntu-22.04` - Ubuntu 22.04 LTS 'Jammy Jackalope'
 - `ubuntu-20.04` - Ubuntu 20.04 LTS 'Focal Fossa'
+
+## Running a single command
+
+Arguments after the image name are passed to the game server script, which runs them and exits with their status. This is useful for one-off tasks on a **stopped** server, such as `details`, `validate` or `backup`:
+
+```bash
+docker run --rm -v /path/to/data:/data -e GAMESERVER=gmodserver gameservermanagers/linuxgsm details
+```
+
+Do not run a command this way against a volume that a running container is using. The two containers cannot see each other, so commands such as `update` or `stop` would not work safely. For a running server, use `docker exec` instead:
+
+```bash
+docker exec -it --user linuxgsm <container> ./gmodserver details
+```
