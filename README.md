@@ -35,5 +35,5 @@ docker run --rm -v /path/to/data:/data -e GAMESERVER=gmodserver gameservermanage
 Do not run a command this way against a volume that a running container is using. The two containers cannot see each other, so commands such as `update` or `stop` would not work safely. For a running server, use `docker exec` instead:
 
 ```bash
-docker exec -it --user linuxgsm <container> ./gmodserver details
+docker exec -it --user linuxgsm details < container > ./gmodserver
 ```
