@@ -1,6 +1,23 @@
 #!/bin/bash
 
 exit_handler() {
+  local signal="${1:-TERM}"
+  # Single-command mode: pass the signal to the running command instead of
+  # stopping a server that is not running
+  if [ "${singlecommand}" == "true" ]; then
+    if [ -n "${childpid}" ]; then
+      echo -e "Interrupting ${GAMESERVER} command"
+      kill -s "${signal}" "${childpid}" 2> /dev/null
+      wait "${childpid}"
+      exit $?
+    fi
+    # Signal arrived before the command started
+    case "${signal}" in
+      INT) exit 130 ;;
+      QUIT) exit 131 ;;
+      *) exit 143 ;;
+    esac
+  fi
   # Execute the shutdown commands
   echo -e "Stopping ${GAMESERVER}"
   exec gosu "${USER}" ./"${GAMESERVER}" stop
@@ -8,9 +25,16 @@ exit_handler() {
   exit ${exitcode}
 }
 
+singlecommand="false"
+if [ "$#" -gt 0 ]; then
+  singlecommand="true"
+fi
+
 # Exit trap
 echo -e "Loading exit handler"
-trap exit_handler SIGQUIT SIGINT SIGTERM
+trap 'exit_handler INT' SIGINT
+trap 'exit_handler QUIT' SIGQUIT
+trap 'exit_handler TERM' SIGTERM
 
 DISTRO="$(grep "PRETTY_NAME" /etc/os-release | awk -F = '{gsub(/"/,"",$2);print $2}')"
 echo -e ""
@@ -93,5 +117,11 @@ export HOME=/data
 echo -e ""
 echo -e "Switch to user ${USER}"
 echo -e "================================="
-exec gosu "${USER}" /app/entrypoint-user.sh &
-wait
+# Bash starts background jobs with INT and QUIT ignored. Reset them so the
+# exit handler can forward every signal to a single command.
+(
+  trap - INT QUIT
+  exec gosu "${USER}" /app/entrypoint-user.sh "$@"
+) &
+childpid=$!
+wait "${childpid}"

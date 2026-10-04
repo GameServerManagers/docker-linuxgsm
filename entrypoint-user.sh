@@ -8,9 +8,12 @@ exit_handler_user() {
   exit ${exitcode}
 }
 
-# Exit trap
-echo -e "Loading exit handler"
-trap exit_handler_user SIGQUIT SIGINT SIGTERM
+# Exit trap (normal mode only: in single-command mode a signal should end the
+# command, not run stop)
+if [ "$#" -eq 0 ]; then
+  echo -e "Loading exit handler"
+  trap exit_handler_user SIGQUIT SIGINT SIGTERM
+fi
 
 # Setup game server
 if [ ! -f "${GAMESERVER}" ]; then
@@ -78,8 +81,24 @@ if [ "${LGSM_DEV}" == "true" ]; then
   ./"${GAMESERVER}" developer
 fi
 
+# If a command was passed in, run it and exit with its status
+if [ "$#" -gt 0 ]; then
+  echo -e ""
+  echo -e "Running ${GAMESERVER} $*"
+  echo -e "================================="
+  # Only install commands may run before the game server is installed. Other
+  # commands can create files in serverfiles, which would make the next normal
+  # start skip the install.
+  if [ -z "$(ls -A -- "${LGSM_SERVERFILES}" 2> /dev/null)" ] && [[ ! "$1" =~ ^(install|i|auto-install|ai)$ ]]; then
+    echo -e "${GAMESERVER} is not installed yet. Start the container without a command to install it, or run auto-install."
+    exit 1
+  fi
+  # exec so the command receives signals directly and its status is the exit status
+  exec ./"${GAMESERVER}" "$@"
+fi
+
 # Install game server
-if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
+if [ -z "$(ls -A -- "${LGSM_SERVERFILES}" 2> /dev/null)" ]; then
   echo -e ""
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
