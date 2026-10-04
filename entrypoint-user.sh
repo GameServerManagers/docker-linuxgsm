@@ -91,12 +91,40 @@ else
   ./"${GAMESERVER}" sponsor
 fi
 
+# Handle update checker/cron logic
+source ./cron-converter.sh
+CRON_FILE="${LGSM_CONFIG}/crontab"
+
 if [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
   echo -e ""
   echo -e "Starting Update Checks"
   echo -e "================================="
-  echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
-  echo -e "update will check every ${UPDATE_CHECK} minutes"
+
+  # Do not overwrite crontab file if LGSM_READ_CRONTAB is set and the file exists
+  if [ -n "${LGSM_READ_CRONTAB}" ] && [ -f "${CRON_FILE}" ]; then
+    echo -e "Using existing crontab at ${CRON_FILE}"
+    RUN_SUPERCRONIC=true
+  else
+    # Convert UPDATE_CHECK to a valid cron expression
+    CRON_EXPR=$(convert_minutes_to_cron "${UPDATE_CHECK}")
+
+    if [ $? -eq 0 ] && [ -n "${CRON_EXPR}" ]; then
+      # Write generated cron expression to file
+      echo "${CRON_EXPR} /app/${GAMESERVER} update > /dev/null 2>&1" > "${CRON_FILE}"
+      echo -e "Update schedule configured: ${CRON_EXPR} (${UPDATE_CHECK} minutes interval)"
+      RUN_SUPERCRONIC=true
+    else
+      echo -e "Error: Invalid UPDATE_CHECK interval ('${UPDATE_CHECK}' minutes). Disabling update checks" >&2
+      RUN_SUPERCRONIC=false
+    fi
+  fi
+
+  # Execute supercronic only if the crontab configuration is valid
+  if [ "${RUN_SUPERCRONIC}" = true ]; then
+    echo -e "Executing supercronic"
+    supercronic -quiet -no-reap "${CRON_FILE}" &
+  fi
+
 else
   echo -e ""
   echo -e "Update checks are disabled"

@@ -4,7 +4,12 @@
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
 
-FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-22.04
+ARG UBUNTU_VER=26.04
+
+FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-${UBUNTU_VER}
+
+ARG TARGETARCH=amd64
+ARG SUPERCRONIC_VERSION=v0.2.48
 
 USER root
 
@@ -23,6 +28,7 @@ ENV LGSM_DATADIR=/data/data
 ENV LGSM_CONFIG=/data/config-lgsm
 ENV LGSM_COMPRESSEDMAPSDIR=/data/Maps-Compressed
 ENV LGSM_DEV=false
+ENV LGSM_READ_CRONTAB=false
 ENV GAMESERVER=jc2server
 ENV VALIDATE_ON_START=false
 ENV UPDATE_CHECK=60
@@ -46,7 +52,6 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   bzip2 \
   ca-certificates \
   cpio \
-  cron \
   curl \
   distro-info \
   file \
@@ -58,7 +63,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   jq \
   lib32gcc-s1 \
   lib32stdc++6 \
-  netcat \
+  $(. /etc/os-release && case "$VERSION_ID" in "20.04"|"22.04") echo "netcat" ;; *) echo "netcat-openbsd" ;; esac) \
   pigz \
   python3 \
   sudo \
@@ -81,15 +86,20 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/*
 
+# Install supercronic
+RUN echo "**** Install Supercronic ****" \
+  && wget -O /usr/local/bin/supercronic https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH} \
+  && chmod +x /usr/local/bin/supercronic
+
 # Install Node.js
 RUN echo "**** Install Node.js ****" \
   && set -uex \
   && mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-  && NODE_MAJOR=20 \
-  && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+  && NODE_MAJOR=24 \
+  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
   && apt-get update \
-  && apt-get install nodejs -y \
+  && apt-get install nodejs -y --no-install-recommends \
   && apt-get -y autoremove \
   && apt-get -y clean \
   && rm -rf /var/lib/apt/lists/* \
@@ -142,6 +152,7 @@ RUN echo "$CACHEBUST"
 COPY entrypoint.sh /app/entrypoint.sh
 COPY entrypoint-user.sh /app/entrypoint-user.sh
 COPY entrypoint-healthcheck.sh /app/entrypoint-healthcheck.sh
+COPY cron-converter.sh /app/cron-converter.sh
 
 ## Ensure entrypoint scripts have execute permissions
 RUN chmod +x /app/entrypoint.sh /app/entrypoint-user.sh /app/entrypoint-healthcheck.sh
