@@ -117,6 +117,11 @@ export HOME=/data
 echo -e ""
 echo -e "Switch to user ${USER}"
 echo -e "================================="
-exec gosu "${USER}" /app/entrypoint-user.sh "$@" &
+# Bash starts background jobs with INT and QUIT ignored. Reset them so the
+# exit handler can forward every signal to a single command.
+(
+  trap - INT QUIT
+  exec gosu "${USER}" /app/entrypoint-user.sh "$@"
+) &
 childpid=$!
 wait "${childpid}"
