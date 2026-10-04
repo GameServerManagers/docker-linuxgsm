@@ -86,7 +86,7 @@ if [ "$#" -gt 0 ]; then
   # Only install commands may run before the game server is installed. Other
   # commands can create files in serverfiles, which would make the next normal
   # start skip the install.
-  if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ] && [[ ! "$1" =~ ^(install|i|auto-install|ai)$ ]]; then
+  if [ -z "$(ls -A -- "${LGSM_SERVERFILES}" 2> /dev/null)" ] && [[ ! "$1" =~ ^(install|i|auto-install|ai)$ ]]; then
     echo -e "${GAMESERVER} is not installed yet. Start the container without a command to install it, or run auto-install."
     exit 1
   fi
@@ -95,7 +95,7 @@ if [ "$#" -gt 0 ]; then
 fi
 
 # Install game server
-if [ -z "$(ls -A -- "/data/serverfiles" 2> /dev/null)" ]; then
+if [ -z "$(ls -A -- "${LGSM_SERVERFILES}" 2> /dev/null)" ]; then
   echo -e ""
   echo -e "Installing ${GAMESERVER}"
   echo -e "================================="
