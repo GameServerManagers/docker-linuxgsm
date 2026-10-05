@@ -51,7 +51,7 @@ jobs:
             ubuntu-24.04
 
       - name: Build and push (Ubuntu 24.04)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.ubuntu-2404
@@ -99,7 +99,7 @@ jobs:
             ubuntu-22.04
 
       - name: Build and push (Ubuntu 22.04)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.ubuntu-2204
@@ -147,7 +147,7 @@ jobs:
             ubuntu-20.04
 
       - name: Build and push (Ubuntu 20.04)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.ubuntu-2004
