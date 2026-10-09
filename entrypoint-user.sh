@@ -146,5 +146,5 @@ sleep 5
 sleep 2
 echo -e "Tail log files"
 echo -e "================================="
-tail -F "${LGSM_LOGDIR}"/{console,script}/*{console,script}.log &
+tail -F "${LGSM_LOGDIR}"/console/*console.log "${LGSM_LOGDIR}"/script/*script.log &
 wait
