@@ -50,3 +50,25 @@ Do not run a command this way against a volume that a running container is using
 ```bash
 docker exec -it --user linuxgsm gmodserver ./gmodserver details
 ```
+
+## Scheduled tasks
+
+Scheduled tasks are run by [Supercronic](https://github.com/aptible/supercronic) as the `linuxgsm` user. Jobs see the same environment variables as the container (for example `LGSM_SERVERFILES`). The container does not need root privileges to schedule them, so it works with `--security-opt no-new-privileges`.
+
+### Update checks (default)
+
+By default the server checks for updates every `UPDATE_CHECK` minutes (default `60`). Set `UPDATE_CHECK=0` to disable. Cron schedules are minute-of-the-hour based, so supported values are `1`–`59`, or whole hours up to `1440` (24 hours). Any other value falls back to `60` with a warning.
+
+### Custom crontab
+
+To schedule your own tasks, create a crontab file at `/data/crontab` (change the path with `CRONTAB_FILE`). If the file exists it is used **instead of** `UPDATE_CHECK`, so include an update job if you still want one. Changes to the file are picked up automatically, without a restart. If the file is invalid, the error is logged and no tasks are scheduled.
+
+```text
+# /data/crontab
+*/30 * * * * /app/rustserver update > /dev/null 2>&1
+0 5 * * *    /app/rustserver restart > /dev/null 2>&1
+0 4 * * *    /app/rustserver backup > /dev/null 2>&1
+0 0 * * 0    /app/rustserver update-lgsm > /dev/null 2>&1
+```
+
+Output from jobs that is not redirected appears in the container log (`docker logs`).

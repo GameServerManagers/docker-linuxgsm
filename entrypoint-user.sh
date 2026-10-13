@@ -110,18 +110,6 @@ else
   ./"${GAMESERVER}" sponsor
 fi
 
-if [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
-  echo -e ""
-  echo -e "Starting Update Checks"
-  echo -e "================================="
-  echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
-  echo -e "update will check every ${UPDATE_CHECK} minutes"
-else
-  echo -e ""
-  echo -e "Update checks are disabled"
-  echo -e "================================="
-fi
-
 # Update or validate game server
 if [ -z "${install}" ]; then
   echo -e ""
@@ -144,6 +132,51 @@ echo -e "================================="
 sleep 5
 ./"${GAMESERVER}" details
 sleep 2
+
+# Convert UPDATE_CHECK (minutes) to a cron schedule. Cron's minute field stops at 59,
+# so longer intervals must be whole hours (up to 24).
+update_check_schedule() {
+  local minutes="$1"
+  if [[ ! "${minutes}" =~ ^[0-9]+$ ]] || [ "${minutes}" -eq 0 ]; then
+    return 1
+  elif [ "${minutes}" -lt 60 ]; then
+    echo "*/${minutes} * * * *"
+  elif [ "${minutes}" -le 1440 ] && [ $((minutes % 60)) -eq 0 ]; then
+    echo "0 */$((minutes / 60)) * * *"
+  else
+    return 1
+  fi
+}
+
+# Scheduled tasks: use the custom crontab if present, otherwise schedule update checks
+crontab=""
+echo -e ""
+echo -e "Scheduled Tasks"
+echo -e "================================="
+if [ -f "${CRONTAB_FILE}" ]; then
+  echo -e "using custom crontab ${CRONTAB_FILE} (UPDATE_CHECK is ignored)"
+  crontab="${CRONTAB_FILE}"
+elif [ -z "${UPDATE_CHECK}" ] || [ "${UPDATE_CHECK}" == "0" ]; then
+  echo -e "update checks are disabled"
+else
+  if ! schedule="$(update_check_schedule "${UPDATE_CHECK}")"; then
+    echo -e "Warning: UPDATE_CHECK=${UPDATE_CHECK} is not a supported interval (1-59, or whole hours up to 1440); checking every 60 minutes instead"
+    schedule="0 */1 * * *"
+  fi
+  crontab="/tmp/crontab"
+  echo "${schedule} /app/${GAMESERVER} update > /dev/null 2>&1" > "${crontab}"
+  echo -e "update will check on schedule: ${schedule}"
+fi
+if [ -n "${crontab}" ]; then
+  if crontabtest="$(supercronic -test "${crontab}" 2>&1)"; then
+    supercronic -quiet -no-reap -passthrough-logs -inotify "${crontab}" &
+  else
+    echo -e "Error: ${crontab} is not a valid crontab, scheduled tasks are disabled"
+    echo -e "${crontabtest}" | tail -n 3
+  fi
+fi
+
+echo -e ""
 echo -e "Tail log files"
 echo -e "================================="
 tail -F "${LGSM_LOGDIR}"/console/*console.log "${LGSM_LOGDIR}"/script/*script.log &

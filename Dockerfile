@@ -30,6 +30,7 @@ ENV GAMESERVER=jc2server
 ENV VALIDATE_ON_START=false
 ENV UPDATE_ON_START=true
 ENV UPDATE_CHECK=60
+ENV CRONTAB_FILE=/data/crontab
 ENV USER=linuxgsm
 ENV UID=1000
 ENV GID=1000
@@ -50,7 +51,6 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
     bzip2 \
     ca-certificates \
     cpio \
-    cron \
     curl \
     distro-info \
     file \
@@ -84,6 +84,15 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/*
+
+# Install Supercronic: runs scheduled tasks as the linuxgsm user, keeping the container environment
+# https://github.com/aptible/supercronic/releases
+ARG SUPERCRONIC_VERSION=v0.2.49
+ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68
+RUN echo "**** Install Supercronic ****" \
+  && curl -fsSLo /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" \
+  && echo "${SUPERCRONIC_SHA1SUM}  /usr/local/bin/supercronic" | sha1sum -c - \
+  && chmod +x /usr/local/bin/supercronic
 
 # Install Node.js
 RUN echo "**** Install Node.js ****" \

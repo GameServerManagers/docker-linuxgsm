@@ -71,9 +71,6 @@ export LGSM_CONFIG=${LGSM_CONFIG}
 
 cd /app || exit
 
-# start cron
-cron
-
 echo -e ""
 echo -e "Machine ID"
 echo -e "================================="
