@@ -15,7 +15,6 @@ on:
       - entrypoint*.sh
       - ubuntu-versions.json
       - .github/workflows/action-docker-publish.yml
-  # Runs an hour after docker-steamcmd (01:00) so it builds on the fresh base image
   schedule:
     - cron: "0 2 * * 6"
 

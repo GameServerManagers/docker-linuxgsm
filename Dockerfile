@@ -85,8 +85,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/*
 
-# Install Supercronic: runs scheduled tasks as the linuxgsm user, keeping the container environment
-# https://github.com/aptible/supercronic/releases
+# Install Supercronic https://github.com/aptible/supercronic
 ARG SUPERCRONIC_VERSION=v0.2.49
 ARG SUPERCRONIC_SHA1SUM=e63c11a9726b775a6a11801e81af4f3fb926aa68
 RUN echo "**** Install Supercronic ****" \

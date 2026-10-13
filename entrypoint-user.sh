@@ -133,8 +133,6 @@ sleep 5
 ./"${GAMESERVER}" details
 sleep 2
 
-# Convert UPDATE_CHECK (minutes) to a cron schedule. Cron's minute field stops at 59,
-# so longer intervals must be whole hours (up to 24).
 update_check_schedule() {
   local minutes="$1"
   if [[ ! "${minutes}" =~ ^[0-9]+$ ]] || [ "${minutes}" -eq 0 ]; then
@@ -148,7 +146,7 @@ update_check_schedule() {
   fi
 }
 
-# Scheduled tasks: use the custom crontab if present, otherwise schedule update checks
+# Scheduled tasks
 crontab=""
 echo -e ""
 echo -e "Scheduled Tasks"
