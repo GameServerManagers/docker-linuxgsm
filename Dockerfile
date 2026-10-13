@@ -44,41 +44,41 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && add-apt-repository ppa:git-core/ppa \
   && apt-get update \
   && apt-get install -y \
-  bc \
-  binutils \
-  bsdmainutils \
-  bzip2 \
-  ca-certificates \
-  cpio \
-  cron \
-  curl \
-  distro-info \
-  file \
-  git \
-  gnupg \
-  gosu \
-  gzip \
-  hostname \
-  jq \
-  lib32gcc-s1 \
-  lib32stdc++6 \
-  netcat-openbsd \
-  pigz \
-  python3 \
-  sudo \
-  tar \
-  tmux \
-  unzip \
-  util-linux \
-  uuid-runtime \
-  wget \
-  xz-utils \
-  zstd \
-  # Docker Extras
-  iproute2 \
-  iputils-ping \
-  nano \
-  vim \
+    bc \
+    binutils \
+    bsdmainutils \
+    bzip2 \
+    ca-certificates \
+    cpio \
+    cron \
+    curl \
+    distro-info \
+    file \
+    git \
+    gnupg \
+    gosu \
+    gzip \
+    hostname \
+    jq \
+    lib32gcc-s1 \
+    lib32stdc++6 \
+    netcat-openbsd \
+    pigz \
+    python3 \
+    sudo \
+    tar \
+    tmux \
+    unzip \
+    util-linux \
+    uuid-runtime \
+    wget \
+    xz-utils \
+    zstd \
+    # Docker Extras
+    iproute2 \
+    iputils-ping \
+    nano \
+    vim \
   && apt-get -y autoremove \
   && apt-get -y clean \
   && rm -rf /var/lib/apt/lists/* \
