@@ -168,7 +168,7 @@ else
   echo -e "update will check on schedule: ${schedule}"
 fi
 if [ -n "${crontab}" ]; then
-  if crontabtest="$(supercronic -test "${crontab}" 2>&1)"; then
+  if crontabtest="$(supercronic -no-reap -test "${crontab}" 2>&1)"; then
     supercronic -quiet -no-reap -passthrough-logs -inotify "${crontab}" &
   else
     echo -e "Error: ${crontab} is not a valid crontab, scheduled tasks are disabled"
