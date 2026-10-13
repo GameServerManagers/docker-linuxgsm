@@ -4,7 +4,8 @@
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
 
-FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-22.04
+ARG UBUNTU_VERSION=26.04
+FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-${UBUNTU_VERSION}
 
 USER root
 # checkov:skip=CKV_DOCKER_8: entrypoint.sh must start as root (usermod, chown, machine-id) and drops to the linuxgsm user with gosu
@@ -61,7 +62,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
   jq \
   lib32gcc-s1 \
   lib32stdc++6 \
-  netcat \
+  netcat-openbsd \
   pigz \
   python3 \
   sudo \
