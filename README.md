@@ -55,20 +55,54 @@ docker exec -it --user linuxgsm gmodserver ./gmodserver details
 
 Scheduled tasks are run by [Supercronic](https://github.com/aptible/supercronic) as the `linuxgsm` user. Jobs see the same environment variables as the container (for example `LGSM_SERVERFILES`). The container does not need root privileges to schedule them, so it works with `--security-opt no-new-privileges`.
 
+Schedules use the container's timezone, which is UTC unless you set `TZ` (for example `TZ=Europe/London`).
+
+Crash recovery does not need a scheduled task: the image's healthcheck already runs `monitor` every minute.
+
 ### Update checks (default)
 
-By default the server checks for updates every `UPDATE_CHECK` minutes (default `60`). Set `UPDATE_CHECK=0` to disable. Cron schedules are minute-of-the-hour based, so supported values are `1`–`59`, or whole hours up to `1440` (24 hours). Any other value falls back to `60` with a warning.
+Without a custom crontab, the server checks for updates every `UPDATE_CHECK` minutes (default `60`). Set `UPDATE_CHECK=0` to disable.
+
+| `UPDATE_CHECK` | Runs                                                           |
+| -------------- | -------------------------------------------------------------- |
+| `1`-`59`       | Every N minutes. Values that divide 60 (15, 30) give even gaps |
+| `60`-`1440`    | Every N/60 hours, on the hour. Must be a whole number of hours |
+| Anything else  | Every 60 minutes, with a warning in the log                    |
+| `0`            | Off                                                            |
 
 ### Custom crontab
 
-To schedule your own tasks, create a crontab file at `/data/crontab` (change the path with `CRONTAB_FILE`). If the file exists it is used **instead of** `UPDATE_CHECK`, so include an update job if you still want one. Changes to the file are picked up automatically, without a restart. If the file is invalid, the error is logged and no tasks are scheduled.
+To schedule your own tasks, create a crontab file at `/data/crontab` (change the path with `CRONTAB_FILE`). While the file exists it is used **instead of** `UPDATE_CHECK`, so include an update job if you still want one.
 
 ```text
 # /data/crontab
-*/30 * * * * /app/rustserver update > /dev/null 2>&1
-0 5 * * *    /app/rustserver restart > /dev/null 2>&1
-0 4 * * *    /app/rustserver backup > /dev/null 2>&1
-0 0 * * 0    /app/rustserver update-lgsm > /dev/null 2>&1
+*/30 * * * *  /app/rustserver update > /dev/null 2>&1
+0 5 * * *     /app/rustserver restart > /dev/null 2>&1
+30 4 * * *    /app/rustserver backup > /dev/null 2>&1
+0 0 * * 0     /app/rustserver update-lgsm > /dev/null 2>&1
+55 4 * * *    /app/rustserver send "say Restart in 5 minutes" > /dev/null 2>&1
 ```
 
-Output from jobs that is not redirected appears in the container log (`docker logs`).
+| Task                         | Command                           | Notes                                         |
+| ---------------------------- | --------------------------------- | --------------------------------------------- |
+| Update the game server       | `update`                          | What `UPDATE_CHECK` schedules by default      |
+| Restart                      | `restart`                         | For example daily, for games that leak memory |
+| Backup                       | `backup`                          | Backups are stored under `/data`              |
+| Update LinuxGSM              | `update-lgsm`                     | Weekly is plenty                              |
+| Update mods / workshop items | `mods-update` / `workshop-update` | Games that support them                       |
+| Send a console command       | `send "..."`                      | Games with console input                      |
+| Wipe                         | `wipe`                            | Games with a wipe command, such as Rust       |
+
+Edit the file on the host (if `/data` is a bind mount) or inside the container:
+
+```bash
+docker exec -it --user linuxgsm rustserver nano /data/crontab
+```
+
+- Creating, editing or deleting `/data/crontab` takes effect within 30 seconds, without a restart. Deleting it switches back to `UPDATE_CHECK`.
+- Each change is checked first. If the file is invalid, the error is logged and the previous schedule stays active.
+- A job is skipped if its previous run is still going, so a slow update never runs twice at once.
+- Output that is not redirected appears in the container log (`docker logs`), which is useful when testing a new line.
+- `crontab -e` is not available in the container; use `/data/crontab` instead.
+
+You can also schedule from the host (host cron, a systemd timer or a Kubernetes CronJob) with `docker exec --user linuxgsm <container> ./<gameserver> <command>`.

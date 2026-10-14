@@ -146,33 +146,54 @@ update_check_schedule() {
   fi
 }
 
+crontab_apply() {
+  local source new message crontabtest
+  if [ -f "${CRONTAB_FILE}" ]; then
+    source="custom:$(md5sum < "${CRONTAB_FILE}")"
+  else
+    source="default:${UPDATE_CHECK}"
+  fi
+  if [ "${source}" == "${crontabsource}" ]; then
+    return
+  fi
+  crontabsource="${source}"
+  new="$(mktemp)"
+  if [ -f "${CRONTAB_FILE}" ]; then
+    cp "${CRONTAB_FILE}" "${new}"
+    message="using custom crontab ${CRONTAB_FILE} (UPDATE_CHECK is ignored)"
+  elif [ -z "${UPDATE_CHECK}" ] || [ "${UPDATE_CHECK}" == "0" ]; then
+    echo "# no scheduled tasks" > "${new}"
+    message="update checks are disabled"
+  else
+    if ! schedule="$(update_check_schedule "${UPDATE_CHECK}")"; then
+      echo -e "Warning: UPDATE_CHECK=${UPDATE_CHECK} is not a supported interval (1-59, or whole hours up to 1440); checking every 60 minutes instead"
+      schedule="0 */1 * * *"
+    fi
+    echo "${schedule} /app/${GAMESERVER} update > /dev/null 2>&1" > "${new}"
+    message="update will check on schedule: ${schedule}"
+  fi
+  if crontabtest="$(supercronic -no-reap -test "${new}" 2>&1)"; then
+    cat "${new}" > "${crontab}"
+    echo -e "Scheduled tasks: ${message}"
+  else
+    echo -e "Error: ${CRONTAB_FILE} is not a valid crontab, keeping the previous schedule"
+    echo -e "${crontabtest}" | tail -n 1
+  fi
+  rm -f "${new}"
+}
+
 # Scheduled tasks
-crontab=""
+crontab="/tmp/crontab"
+crontabsource=""
+echo "# no scheduled tasks" > "${crontab}"
 echo -e ""
 echo -e "Scheduled Tasks"
 echo -e "================================="
-if [ -f "${CRONTAB_FILE}" ]; then
-  echo -e "using custom crontab ${CRONTAB_FILE} (UPDATE_CHECK is ignored)"
-  crontab="${CRONTAB_FILE}"
-elif [ -z "${UPDATE_CHECK}" ] || [ "${UPDATE_CHECK}" == "0" ]; then
-  echo -e "update checks are disabled"
-else
-  if ! schedule="$(update_check_schedule "${UPDATE_CHECK}")"; then
-    echo -e "Warning: UPDATE_CHECK=${UPDATE_CHECK} is not a supported interval (1-59, or whole hours up to 1440); checking every 60 minutes instead"
-    schedule="0 */1 * * *"
-  fi
-  crontab="/tmp/crontab"
-  echo "${schedule} /app/${GAMESERVER} update > /dev/null 2>&1" > "${crontab}"
-  echo -e "update will check on schedule: ${schedule}"
-fi
-if [ -n "${crontab}" ]; then
-  if crontabtest="$(supercronic -no-reap -test "${crontab}" 2>&1)"; then
-    supercronic -quiet -no-reap -passthrough-logs -inotify "${crontab}" &
-  else
-    echo -e "Error: ${crontab} is not a valid crontab, scheduled tasks are disabled"
-    echo -e "${crontabtest}" | tail -n 3
-  fi
-fi
+crontab_apply
+supercronic -quiet -no-reap -passthrough-logs -inotify "${crontab}" &
+while sleep 30; do
+  crontab_apply
+done &
 
 echo -e ""
 echo -e "Tail log files"
