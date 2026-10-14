@@ -15,7 +15,6 @@ on:
       - entrypoint*.sh
       - ubuntu-versions.json
       - .github/workflows/action-docker-publish.yml
-  # Runs an hour after docker-steamcmd (01:00) so it builds on the fresh base image
   schedule:
     - cron: "0 2 * * 6"
 
@@ -95,9 +94,11 @@ jobs:
           docker run --rm --entrypoint bash linuxgsm:test -c '
             set -euo pipefail
             grep PRETTY_NAME /etc/os-release
-            for cmd in curl gamedig git gosu jq nc node steamcmd tmux; do
+            for cmd in curl gamedig git gosu jq nc node steamcmd supercronic tmux; do
               command -v "${cmd}" > /dev/null || { echo "missing: ${cmd}"; exit 1; }
             done
+            echo "* * * * * /app/jc2server update" > /tmp/crontab-test
+            supercronic -no-reap -test /tmp/crontab-test
             cd /app
             gosu linuxgsm ./linuxgsm.sh list > /dev/null
             gosu linuxgsm steamcmd +login anonymous +quit

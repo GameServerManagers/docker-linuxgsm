@@ -110,18 +110,6 @@ else
   ./"${GAMESERVER}" sponsor
 fi
 
-if [ -n "${UPDATE_CHECK}" ] && [ "${UPDATE_CHECK}" != "0" ]; then
-  echo -e ""
-  echo -e "Starting Update Checks"
-  echo -e "================================="
-  echo -e "*/${UPDATE_CHECK} * * * * /app/${GAMESERVER} update > /dev/null 2>&1" | crontab -
-  echo -e "update will check every ${UPDATE_CHECK} minutes"
-else
-  echo -e ""
-  echo -e "Update checks are disabled"
-  echo -e "================================="
-fi
-
 # Update or validate game server
 if [ -z "${install}" ]; then
   echo -e ""
@@ -144,6 +132,70 @@ echo -e "================================="
 sleep 5
 ./"${GAMESERVER}" details
 sleep 2
+
+update_check_schedule() {
+  local minutes="$1"
+  if [[ ! "${minutes}" =~ ^[0-9]+$ ]] || [ "${minutes}" -eq 0 ]; then
+    return 1
+  elif [ "${minutes}" -lt 60 ]; then
+    echo "*/${minutes} * * * *"
+  elif [ "${minutes}" -le 1440 ] && [ $((minutes % 60)) -eq 0 ]; then
+    echo "0 */$((minutes / 60)) * * *"
+  else
+    return 1
+  fi
+}
+
+crontab_apply() {
+  local source new message crontabtest
+  if [ -f "${CRONTAB_FILE}" ]; then
+    source="custom:$(md5sum < "${CRONTAB_FILE}")"
+  else
+    source="default:${UPDATE_CHECK}"
+  fi
+  if [ "${source}" == "${crontabsource}" ]; then
+    return
+  fi
+  crontabsource="${source}"
+  new="$(mktemp)"
+  if [ -f "${CRONTAB_FILE}" ]; then
+    cp "${CRONTAB_FILE}" "${new}"
+    message="using custom crontab ${CRONTAB_FILE} (UPDATE_CHECK is ignored)"
+  elif [ -z "${UPDATE_CHECK}" ] || [ "${UPDATE_CHECK}" == "0" ]; then
+    echo "# no scheduled tasks" > "${new}"
+    message="update checks are disabled"
+  else
+    if ! schedule="$(update_check_schedule "${UPDATE_CHECK}")"; then
+      echo -e "Warning: UPDATE_CHECK=${UPDATE_CHECK} is not a supported interval (1-59, or whole hours up to 1440); checking every 60 minutes instead"
+      schedule="0 */1 * * *"
+    fi
+    echo "${schedule} /app/${GAMESERVER} update > /dev/null 2>&1" > "${new}"
+    message="update will check on schedule: ${schedule}"
+  fi
+  if crontabtest="$(supercronic -no-reap -test "${new}" 2>&1)"; then
+    cat "${new}" > "${crontab}"
+    echo -e "Scheduled tasks: ${message}"
+  else
+    echo -e "Error: ${CRONTAB_FILE} is not a valid crontab, keeping the previous schedule"
+    echo -e "${crontabtest}" | tail -n 1
+  fi
+  rm -f "${new}"
+}
+
+# Scheduled tasks
+crontab="/tmp/crontab"
+crontabsource=""
+echo "# no scheduled tasks" > "${crontab}"
+echo -e ""
+echo -e "Scheduled Tasks"
+echo -e "================================="
+crontab_apply
+supercronic -quiet -no-reap -passthrough-logs -inotify "${crontab}" &
+while sleep 30; do
+  crontab_apply
+done &
+
+echo -e ""
 echo -e "Tail log files"
 echo -e "================================="
 tail -F "${LGSM_LOGDIR}"/console/*console.log "${LGSM_LOGDIR}"/script/*script.log &
