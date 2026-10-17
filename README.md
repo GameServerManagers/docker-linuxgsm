@@ -102,16 +102,16 @@ The image's health check runs LinuxGSM's `monitor` command, which also restarts 
 
 ## Configuration
 
-| Variable            | Default     | What it does                                                                                              |
-| ------------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
-| `GAMESERVER`        | `jc2server` | The LinuxGSM server to run, for example `csgoserver` or `pzserver`                                        |
-| `UPDATE_ON_START`   | `true`      | Check for a game server update each time the container starts                                             |
-| `VALIDATE_ON_START` | `false`     | Check the game files each time the container starts (slow)                                                |
-| `UPDATE_CHECK`      | `60`        | Minutes between update checks while the server runs. `0` turns them off; `60` or more checks once an hour |
-| `UID`               | `1000`      | User ID that owns the files in `/data`                                                                    |
-| `GID`               | `1000`      | Group ID that owns the files in `/data`                                                                   |
-| `LGSM_GITHUBBRANCH` | `master`    | The LinuxGSM branch to use. Any other branch, such as `develop`, is downloaded on start                   |
-| `LGSM_DEV`          | `false`     | Turn on LinuxGSM's developer mode                                                                         |
+| Variable            | Default      | What it does                                                                                              |
+| ------------------- | ------------ | --------------------------------------------------------------------------------------------------------- |
+| `GAMESERVER`        | `gmodserver` | The LinuxGSM server to run, for example `csgoserver` or `pzserver`                                        |
+| `UPDATE_ON_START`   | `true`       | Check for a game server update each time the container starts                                             |
+| `VALIDATE_ON_START` | `false`      | Check the game files each time the container starts (slow)                                                |
+| `UPDATE_CHECK`      | `60`         | Minutes between update checks while the server runs. `0` turns them off; `60` or more checks once an hour |
+| `UID`               | `1000`       | User ID that owns the files in `/data`                                                                    |
+| `GID`               | `1000`       | Group ID that owns the files in `/data`                                                                   |
+| `LGSM_GITHUBBRANCH` | `master`     | The LinuxGSM branch to use. Any other branch, such as `develop`, is downloaded on start                   |
+| `LGSM_DEV`          | `false`      | Turn on LinuxGSM's developer mode                                                                         |
 
 Game server settings live in LinuxGSM's own config files in `/data/config-lgsm`. See the [LinuxGSM docs](https://docs.linuxgsm.com) for what they can do.
 
