@@ -4,15 +4,19 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        UBUNTU_VERSION: "26.04"
-    container_name: jc2server
+        DISTRO: ubuntu
+        DISTRO_VERSION: "26.04"
+    container_name: gmodserver
     environment:
-      - GAMESERVER=jc2server
+      - GAMESERVER=gmodserver
       - LGSM_GITHUBUSER=GameServerManagers
       - LGSM_GITHUBREPO=LinuxGSM
       - LGSM_GITHUBBRANCH=develop
     volumes:
-      - /home/linuxgsm/jc2server:/data
+      - /home/linuxgsm/gmodserver:/data
     ports:
-      - "7777:7777/udp"
+      - "27015:27015/udp"
+      - "27015:27015/tcp"
+      - "27005:27005/udp"
+      - "27020:27020/udp"
     restart: unless-stopped
