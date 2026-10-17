@@ -6,7 +6,8 @@
 
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=26.04
-FROM ghcr.io/gameservermanagers/steamcmd:${DISTRO}-${DISTRO_VERSION}
+ARG BASE_IMAGE=ghcr.io/gameservermanagers/steamcmd:${DISTRO}-${DISTRO_VERSION}
+FROM ${BASE_IMAGE}
 
 USER root
 # checkov:skip=CKV_DOCKER_8: entrypoint.sh must start as root (usermod, chown, machine-id) and drops to the linuxgsm user with gosu
@@ -40,67 +41,127 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## Install Base LinuxGSM Requirements
 RUN echo "**** Install Base LinuxGSM Requirements ****" \
   && . /etc/os-release \
-  && apt-get update \
-  && if [ "${ID}" = "ubuntu" ]; then \
-    apt-get install -y software-properties-common \
-    && add-apt-repository multiverse \
-    && add-apt-repository ppa:git-core/ppa \
-    && apt-get update; \
+  && if [ "${ID}" = "rocky" ]; then \
+    dnf -y install epel-release dnf-plugins-core \
+    && dnf config-manager --set-enabled crb \
+    && dnf -y install --allowerasing \
+      bc \
+      binutils \
+      bzip2 \
+      ca-certificates \
+      cpio \
+      cronie \
+      curl \
+      diffutils \
+      file \
+      git \
+      glibc.i686 \
+      gnupg2 \
+      gzip \
+      hostname \
+      jq \
+      libcurl \
+      libstdc++.i686 \
+      nmap-ncat \
+      pigz \
+      procps-ng \
+      python3 \
+      sudo \
+      tar \
+      tmux \
+      unzip \
+      util-linux \
+      wget \
+      which \
+      xz \
+      zstd \
+      # Docker Extras
+      iproute \
+      iputils \
+      nano \
+      vim-minimal \
+    && ln -s /usr/sbin/crond /usr/local/bin/cron \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf; \
+  else \
+    apt-get update \
+    && if [ "${ID}" = "ubuntu" ]; then \
+      apt-get install -y software-properties-common \
+      && add-apt-repository multiverse \
+      && add-apt-repository ppa:git-core/ppa \
+      && apt-get update; \
+    fi \
+    && apt-get install -y \
+      bc \
+      binutils \
+      bsdmainutils \
+      bzip2 \
+      ca-certificates \
+      cpio \
+      cron \
+      curl \
+      distro-info \
+      file \
+      git \
+      gnupg \
+      gosu \
+      gzip \
+      hostname \
+      jq \
+      lib32gcc-s1 \
+      lib32stdc++6 \
+      netcat-openbsd \
+      pigz \
+      python3 \
+      sudo \
+      tar \
+      tmux \
+      unzip \
+      util-linux \
+      uuid-runtime \
+      wget \
+      xz-utils \
+      zstd \
+      # Docker Extras
+      iproute2 \
+      iputils-ping \
+      nano \
+      vim \
+    && apt-get -y autoremove \
+    && apt-get -y clean \
+    && rm -rf /var/lib/apt/lists/*; \
   fi \
-  && apt-get install -y \
-    bc \
-    binutils \
-    bsdmainutils \
-    bzip2 \
-    ca-certificates \
-    cpio \
-    cron \
-    curl \
-    distro-info \
-    file \
-    git \
-    gnupg \
-    gosu \
-    gzip \
-    hostname \
-    jq \
-    lib32gcc-s1 \
-    lib32stdc++6 \
-    netcat-openbsd \
-    pigz \
-    python3 \
-    sudo \
-    tar \
-    tmux \
-    unzip \
-    util-linux \
-    uuid-runtime \
-    wget \
-    xz-utils \
-    zstd \
-    # Docker Extras
-    iproute2 \
-    iputils-ping \
-    nano \
-    vim \
-  && apt-get -y autoremove \
-  && apt-get -y clean \
-  && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/*
 
 # Install Node.js
 RUN echo "**** Install Node.js ****" \
   && set -uex \
-  && mkdir -p /etc/apt/keyrings \
-  && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+  && . /etc/os-release \
   && NODE_MAJOR=24 \
-  && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
-  && apt-get update \
-  && apt-get install nodejs -y \
-  && apt-get -y autoremove \
-  && apt-get -y clean \
-  && rm -rf /var/lib/apt/lists/* \
+  && if [ "${ID}" = "rocky" ]; then \
+    printf '%s\n' \
+      '[nodesource-nodejs]' \
+      'name=Node.js Packages' \
+      "baseurl=https://rpm.nodesource.com/pub_${NODE_MAJOR}.x/nodistro/nodejs/x86_64" \
+      'enabled=1' \
+      'gpgcheck=1' \
+      'gpgkey=https://rpm.nodesource.com/gpgkey/ns-operations-public.key' \
+      'module_hotfixes=1' \
+      > /etc/yum.repos.d/nodesource.repo \
+    && dnf -y install nodejs \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf; \
+  else \
+    mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update \
+    && apt-get install nodejs -y \
+    && apt-get -y autoremove \
+    && apt-get -y clean \
+    && rm -rf /var/lib/apt/lists/*; \
+  fi \
   && rm -rf /tmp/* \
   && rm -rf /var/tmp/* \
   && npm install -g npm@latest

@@ -1,2 +1,3 @@
 ignored:
   - DL3008 # Pin versions in apt-get install
+  - DL3041 # Pin versions in dnf install
