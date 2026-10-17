@@ -4,7 +4,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        UBUNTU_VERSION: "26.04"
+        DISTRO: ubuntu
+        DISTRO_VERSION: "26.04"
     container_name: jc2server
     environment:
       - GAMESERVER=jc2server

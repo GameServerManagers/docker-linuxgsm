@@ -24,18 +24,28 @@ LinuxGSM is a command-line tool for quick, simple deployment and management of L
 - `ubuntu-24.04` - Ubuntu 24.04 LTS 'Noble Numbat'
 - `ubuntu-22.04` - Ubuntu 22.04 LTS 'Jammy Jellyfish'
 - `ubuntu-20.04` - Ubuntu 20.04 LTS 'Focal Fossa' (standard support ended May 2025; may be removed)
+- `debian-13` - Debian 13 'Trixie' (for testing LinuxGSM on Debian; not a supported release)
 
 Images are built for `linux/amd64` only and use [gameservermanagers/steamcmd](https://github.com/GameServerManagers/docker-steamcmd) as their base.
 
 ## Building
 
-There is a single `Dockerfile`; choose the Ubuntu release with the `UBUNTU_VERSION` build argument (defaults to the current LTS):
+There is a single `Dockerfile`. Choose the base with the `DISTRO` (`ubuntu` or `debian`) and `DISTRO_VERSION` build arguments (defaults to the current Ubuntu LTS):
 
 ```bash
-docker build --build-arg UBUNTU_VERSION=24.04 -t linuxgsm:ubuntu-24.04 .
+docker build --build-arg DISTRO_VERSION=24.04 -t linuxgsm:ubuntu-24.04 .
+docker build --build-arg DISTRO=debian --build-arg DISTRO_VERSION=13 -t linuxgsm:debian-13 .
 ```
 
-The versions that get built are listed in [`ubuntu-versions.json`](ubuntu-versions.json). A weekly workflow checks for a new Ubuntu LTS. Once the matching steamcmd base image exists, and the image builds and passes a smoke test, it opens a pull request to add the new version.
+The versions that get built are listed in [`versions.json`](versions.json). A weekly workflow checks for a new Ubuntu LTS. Once the matching steamcmd base image exists, and the image builds and passes a smoke test, it opens a pull request to add the new version.
+
+### Dependency check
+
+A weekly workflow checks that every package in LinuxGSM's dependency list for each image's distro (`lgsm/data/<distro>-<version>.csv`, on both `master` and `develop`) can be installed. It only simulates the installs, so no game server files are downloaded. To run it locally:
+
+```bash
+docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:debian-13 develop
+```
 
 ## Running a single command
 

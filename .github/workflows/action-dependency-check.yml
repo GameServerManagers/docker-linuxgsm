@@ -1,0 +1,59 @@
+name: Dependency Check
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - Dockerfile
+      - versions.json
+      - tests/check-deps.sh
+      - .github/workflows/action-dependency-check.yml
+  # Runs two hours after Docker Publish (02:00)
+  schedule:
+    - cron: "0 4 * * 6"
+
+permissions:
+  contents: read
+
+jobs:
+  versions:
+    name: Read versions
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.read.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read versions.json
+        id: read
+        run: echo "matrix=$(jq -c . versions.json)" >> "$GITHUB_OUTPUT"
+
+  check:
+    name: Check ${{ matrix.distro }}-${{ matrix.version }}
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.versions.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build (${{ matrix.distro }}-${{ matrix.version }})
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          build-args: |
+            DISTRO=${{ matrix.distro }}
+            DISTRO_VERSION=${{ matrix.version }}
+          platforms: linux/amd64
+          load: true
+          tags: linuxgsm:test
+
+      - name: Check LinuxGSM master dependencies
+        run: docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:test master
+
+      - name: Check LinuxGSM develop dependencies
+        if: ${{ !cancelled() }}
+        run: docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:test develop

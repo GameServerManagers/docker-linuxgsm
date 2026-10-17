@@ -7,13 +7,13 @@ on:
     paths:
       - Dockerfile
       - entrypoint*.sh
-      - ubuntu-versions.json
+      - versions.json
       - .github/workflows/action-docker-publish.yml
   pull_request:
     paths:
       - Dockerfile
       - entrypoint*.sh
-      - ubuntu-versions.json
+      - versions.json
       - .github/workflows/action-docker-publish.yml
   # Runs an hour after docker-steamcmd (01:00) so it builds on the fresh base image
   schedule:
@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   versions:
-    name: Read Ubuntu versions
+    name: Read versions
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.read.outputs.matrix }}
@@ -32,12 +32,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Read ubuntu-versions.json
+      - name: Read versions.json
         id: read
-        run: echo "matrix=$(jq -c . ubuntu-versions.json)" >> "$GITHUB_OUTPUT"
+        run: echo "matrix=$(jq -c . versions.json)" >> "$GITHUB_OUTPUT"
 
   build:
-    name: Build Ubuntu ${{ matrix.version }}
+    name: Build ${{ matrix.distro }}-${{ matrix.version }}
     needs: versions
     runs-on: ubuntu-latest
     permissions:
@@ -76,15 +76,17 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=ubuntu-${{ matrix.version }}
+            type=raw,value=${{ matrix.distro }}-${{ matrix.version }}
             type=raw,value=latest,enable=${{ matrix.latest }}
             type=raw,value=ubuntu,enable=${{ matrix.latest }}
 
-      - name: Build (Ubuntu ${{ matrix.version }})
+      - name: Build (${{ matrix.distro }}-${{ matrix.version }})
         uses: docker/build-push-action@v7
         with:
           context: .
-          build-args: UBUNTU_VERSION=${{ matrix.version }}
+          build-args: |
+            DISTRO=${{ matrix.distro }}
+            DISTRO_VERSION=${{ matrix.version }}
           platforms: linux/amd64
           load: true
           tags: linuxgsm:test
@@ -103,12 +105,14 @@ jobs:
             gosu linuxgsm steamcmd +login anonymous +quit
           '
 
-      - name: Push (Ubuntu ${{ matrix.version }})
+      - name: Push (${{ matrix.distro }}-${{ matrix.version }})
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v7
         with:
           context: .
-          build-args: UBUNTU_VERSION=${{ matrix.version }}
+          build-args: |
+            DISTRO=${{ matrix.distro }}
+            DISTRO_VERSION=${{ matrix.version }}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

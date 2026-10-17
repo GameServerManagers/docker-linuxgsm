@@ -4,8 +4,9 @@
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
 
-ARG UBUNTU_VERSION=26.04
-FROM ghcr.io/gameservermanagers/steamcmd:ubuntu-${UBUNTU_VERSION}
+ARG DISTRO=ubuntu
+ARG DISTRO_VERSION=26.04
+FROM ghcr.io/gameservermanagers/steamcmd:${DISTRO}-${DISTRO_VERSION}
 
 USER root
 # checkov:skip=CKV_DOCKER_8: entrypoint.sh must start as root (usermod, chown, machine-id) and drops to the linuxgsm user with gosu
@@ -38,11 +39,14 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Install Base LinuxGSM Requirements
 RUN echo "**** Install Base LinuxGSM Requirements ****" \
+  && . /etc/os-release \
   && apt-get update \
-  && apt-get install -y software-properties-common \
-  && add-apt-repository multiverse \
-  && add-apt-repository ppa:git-core/ppa \
-  && apt-get update \
+  && if [ "${ID}" = "ubuntu" ]; then \
+    apt-get install -y software-properties-common \
+    && add-apt-repository multiverse \
+    && add-apt-repository ppa:git-core/ppa \
+    && apt-get update; \
+  fi \
   && apt-get install -y \
     bc \
     binutils \

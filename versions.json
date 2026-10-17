@@ -1,0 +1,7 @@
+[
+  { "distro": "ubuntu", "version": "26.04", "latest": true },
+  { "distro": "ubuntu", "version": "24.04", "latest": false },
+  { "distro": "ubuntu", "version": "22.04", "latest": false },
+  { "distro": "ubuntu", "version": "20.04", "latest": false },
+  { "distro": "debian", "version": "13", "latest": false }
+]
