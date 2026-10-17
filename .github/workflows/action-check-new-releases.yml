@@ -1,0 +1,151 @@
+name: Check for new releases
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check for new ${{ matrix.label }} release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu
+            label: Ubuntu LTS
+            latest: true
+            skip: ""
+          - distro: debian
+            label: Debian
+            latest: false
+            skip: ""
+          - distro: rocky
+            label: Rocky Linux
+            latest: false
+            skip: "10"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Find newest release
+        id: release
+        env:
+          DISTRO: ${{ matrix.distro }}
+          LATEST: ${{ matrix.latest }}
+          SKIP: ${{ matrix.skip }}
+        run: |
+          today="$(date -u +%F)"
+          case "${DISTRO}" in
+            ubuntu)
+              # version,codename,series,created,release,eol,eol-server,eol-esm
+              releases="$(curl -fsSL https://salsa.debian.org/debian/distro-info-data/-/raw/main/ubuntu.csv | awk -F, -v today="${today}" '$1 ~ /LTS/ && $5 != "" && $5 <= today { split($1, v, " "); print v[1] "," $2 }')"
+              name="Ubuntu"
+              ;;
+            debian)
+              # version,codename,series,created,release,eol,eol-lts,eol-elts
+              releases="$(curl -fsSL https://salsa.debian.org/debian/distro-info-data/-/raw/main/debian.csv | awk -F, -v today="${today}" '$1 ~ /^[0-9]+$/ && $5 != "" && $5 <= today { print $1 "," $2 }')"
+              name="Debian"
+              ;;
+            rocky)
+              releases="$(curl -fsSL https://endoflife.date/api/v1/products/rocky-linux/ | jq -r --arg today "${today}" '.result.releases[] | select(.releaseDate != null and .releaseDate <= $today) | "\(.name),\(.codename // "")"')"
+              name="Rocky Linux"
+              ;;
+          esac
+          newest="$(printf '%s\n' "${releases}" | awk -F, -v skip=" ${SKIP} " 'index(skip, " " $1 " ") == 0' | sort -t, -k1,1V | tail -n 1)"
+          version="${newest%%,*}"
+          codename="${newest#*,}"
+          image="ghcr.io/gameservermanagers/steamcmd:${DISTRO}-${version}"
+          title="${name} ${version}"
+          if [ "${DISTRO}" = "ubuntu" ]; then
+            title="${title} LTS"
+          fi
+          if [ -n "${codename}" ]; then
+            title="${title} (${codename})"
+          fi
+          echo "Newest released ${name}: ${version} ${codename}"
+          if [ -z "${version}" ]; then
+            echo "::error::No ${name} releases found"
+            exit 1
+          elif jq -e --arg d "${DISTRO}" --arg v "${version}" 'any(.[]; .distro == $d and .version == $v)' versions.json > /dev/null; then
+            echo "Already tracked in versions.json"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          elif ! docker manifest inspect "${image}" > /dev/null 2>&1; then
+            echo "steamcmd:${DISTRO}-${version} base image not published yet"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "new=true"
+              echo "version=${version}"
+              echo "title=${title}"
+              echo "checklist<<EOF"
+              echo "- [ ] Check LinuxGSM has \`lgsm/data/${DISTRO}-${version}.csv\`"
+              echo "- [ ] Update the Tags list in \`README.md\`"
+              if [ "${LATEST}" = "true" ]; then
+                echo "- [ ] Change the \`DISTRO_VERSION\` default in \`Dockerfile\`"
+              fi
+              echo "- [ ] Decide whether the oldest ${name} release should be dropped (check docker-gameserver usage first)"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test build
+        if: steps.release.outputs.new == 'true'
+        env:
+          DISTRO: ${{ matrix.distro }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          docker build --build-arg DISTRO="${DISTRO}" --build-arg DISTRO_VERSION="${VERSION}" -t linuxgsm:test .
+          docker run --rm --entrypoint bash linuxgsm:test -c '
+            set -euo pipefail
+            grep PRETTY_NAME /etc/os-release
+            for cmd in cron curl gamedig git gosu jq nc node steamcmd tmux; do
+              command -v "${cmd}" > /dev/null || { echo "missing: ${cmd}"; exit 1; }
+            done
+            cd /app
+            gosu linuxgsm ./linuxgsm.sh list > /dev/null
+            gosu linuxgsm steamcmd +login anonymous +quit
+          '
+
+      - name: Check LinuxGSM develop dependencies
+        id: deps
+        if: steps.release.outputs.new == 'true'
+        continue-on-error: true
+        run: docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:test develop
+
+      - name: Add version
+        if: steps.release.outputs.new == 'true'
+        env:
+          DISTRO: ${{ matrix.distro }}
+          VERSION: ${{ steps.release.outputs.version }}
+          LATEST: ${{ matrix.latest }}
+        run: |
+          jq --arg d "${DISTRO}" --arg v "${VERSION}" --argjson latest "${LATEST}" '
+            (map(.distro) | index($d) // length) as $i
+            | (if $latest then map(.latest = false) else . end)
+            | .[:$i] + [{distro: $d, version: $v, latest: $latest}] + .[$i:]
+          ' versions.json > versions.json.tmp
+          mv versions.json.tmp versions.json
+
+      - name: Create pull request
+        if: steps.release.outputs.new == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: ${{ matrix.distro }}-${{ steps.release.outputs.version }}
+          commit-message: "feat: add ${{ steps.release.outputs.title }}${{ matrix.latest && ' and make it latest' || '' }}"
+          title: "feat: add ${{ steps.release.outputs.title }}${{ matrix.latest && ' and make it latest' || '' }}"
+          body: |
+            ${{ steps.release.outputs.title }} has been released and `steamcmd:${{ matrix.distro }}-${{ steps.release.outputs.version }}` is published.
+
+            The image built and passed a smoke test (required commands, `linuxgsm.sh list` and a SteamCMD anonymous login) in this workflow. The LinuxGSM `develop` dependency check result was: **${{ steps.deps.outcome }}** (see the workflow run for details).
+
+            This PR adds it to `versions.json`${{ matrix.latest && ' and moves the `latest` / `ubuntu` tags to it' || '' }}.
+
+            Before merging:
+            ${{ steps.release.outputs.checklist }}
