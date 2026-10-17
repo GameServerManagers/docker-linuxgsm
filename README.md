@@ -52,33 +52,37 @@ Rocky Linux 10 isn't available, because it no longer ships the 32-bit (i686) lib
 
 ## Quick start
 
-Run a Just Cause 2 server (`jc2server`), keeping everything in `/path/to/jc2server` on the host:
+Run a Garry's Mod server (`gmodserver`), keeping everything in `/path/to/gmodserver` on the host:
 
 ```bash
-docker run -d --name jc2server \
-  -e GAMESERVER=jc2server \
-  -v /path/to/jc2server:/data \
-  -p 7777:7777/udp \
+docker run -d --name gmodserver \
+  -e GAMESERVER=gmodserver \
+  -v /path/to/gmodserver:/data \
+  -p 27015:27015/udp -p 27015:27015/tcp \
+  -p 27005:27005/udp -p 27020:27020/udp \
   --stop-timeout 60 \
   gameservermanagers/linuxgsm:latest
-docker logs -f jc2server
+docker logs -f gmodserver
 ```
 
-Swap `jc2server` for any server in LinuxGSM's [server list](https://linuxgsm.com/servers/), and publish the ports that game uses. On the first start the container installs the game server, which can take a while for big games. If the game needs packages that aren't in the image, LinuxGSM installs them.
+Swap `gmodserver` for any server in LinuxGSM's [server list](https://linuxgsm.com/servers/), and publish the ports that game uses. On the first start the container installs the game server, which can take a while for big games. If the game needs packages that aren't in the image, LinuxGSM installs them.
 
 The same with Docker Compose:
 
 ```yaml
 services:
-  jc2server:
+  gmodserver:
     image: gameservermanagers/linuxgsm:latest
-    container_name: jc2server
+    container_name: gmodserver
     environment:
-      - GAMESERVER=jc2server
+      - GAMESERVER=gmodserver
     volumes:
-      - /path/to/jc2server:/data
+      - /path/to/gmodserver:/data
     ports:
-      - "7777:7777/udp"
+      - "27015:27015/udp"
+      - "27015:27015/tcp"
+      - "27005:27005/udp"
+      - "27020:27020/udp"
     stop_grace_period: 60s
     restart: unless-stopped
 ```
@@ -127,16 +131,16 @@ On every start, the container makes the files in `/data` owned by `UID` and `GID
 
 ## Running LinuxGSM commands
 
-For a running server, use `docker exec` (here the container is named `jc2server`):
+For a running server, use `docker exec` (here the container is named `gmodserver`):
 
 ```bash
-docker exec -it --user linuxgsm jc2server ./jc2server details
+docker exec -it --user linuxgsm gmodserver ./gmodserver details
 ```
 
 For one-off tasks on a **stopped** server, such as `details`, `validate` or `backup`, pass the command after the image name. The container runs it and exits with its status:
 
 ```bash
-docker run --rm -v /path/to/jc2server:/data -e GAMESERVER=jc2server gameservermanagers/linuxgsm details
+docker run --rm -v /path/to/gmodserver:/data -e GAMESERVER=gmodserver gameservermanagers/linuxgsm details
 ```
 
 Don't do this against data that a running container is using. The two containers can't see each other, so commands such as `update` or `stop` wouldn't work safely.
