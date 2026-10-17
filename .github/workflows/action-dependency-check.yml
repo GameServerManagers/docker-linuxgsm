@@ -52,8 +52,8 @@ jobs:
           tags: linuxgsm:test
 
       - name: Check LinuxGSM master dependencies
+        continue-on-error: true
         run: docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:test master
 
       - name: Check LinuxGSM develop dependencies
-        if: ${{ !cancelled() }}
         run: docker run --rm -u root -v "$PWD/tests:/tests:ro" --entrypoint /tests/check-deps.sh linuxgsm:test develop

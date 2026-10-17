@@ -97,7 +97,7 @@ jobs:
           docker run --rm --entrypoint bash linuxgsm:test -c '
             set -euo pipefail
             grep PRETTY_NAME /etc/os-release
-            for cmd in curl gamedig git gosu jq nc node steamcmd tmux; do
+            for cmd in cron curl gamedig git gosu jq nc node steamcmd tmux; do
               command -v "${cmd}" > /dev/null || { echo "missing: ${cmd}"; exit 1; }
             done
             cd /app
