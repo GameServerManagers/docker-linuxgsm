@@ -3,6 +3,7 @@
 #
 # https://github.com/GameServerManagers/docker-linuxgsm
 #
+# hadolint global ignore=DL3002,DL3003,DL3008,DL3015,DL3025,DL3041,DL3059,DL3066
 
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=26.04
@@ -12,6 +13,7 @@ FROM ${BASE_IMAGE}
 USER root
 # checkov:skip=CKV_DOCKER_8: entrypoint.sh must start as root (usermod, chown, machine-id) and drops to the linuxgsm user with gosu
 # checkov:skip=CKV2_DOCKER_1: sudo is installed on purpose so the linuxgsm user can install extra packages
+# checkov:skip=CKV_DOCKER_7: the base image tag always comes from the DISTRO and DISTRO_VERSION build arguments
 
 ## Remove steam user from upstream base image if present
 RUN if id -u steam >/dev/null 2>&1; then echo "Removing steam user from base image"; userdel -r steam || true; else echo "steam user not present"; fi

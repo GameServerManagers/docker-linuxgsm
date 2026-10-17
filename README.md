@@ -41,7 +41,12 @@ docker build --build-arg DISTRO=rocky --build-arg DISTRO_VERSION=9 -t linuxgsm:r
 docker build --build-arg BASE_IMAGE=steamcmd:rocky-9 -t linuxgsm:rocky-9 .
 ```
 
-The versions that get built are listed in [`versions.json`](versions.json). A weekly workflow checks for a new Ubuntu LTS, Debian stable or Rocky Linux release. Once the matching steamcmd base image exists, and the image builds and passes a smoke test, it opens a pull request to add the new version. The pull request also reports whether LinuxGSM's dependency check passes on it. For a new Ubuntu LTS, it also moves `latest` to it. Rocky Linux 10 is skipped, because it has no i686 libraries.
+The versions that get built are listed in [`versions.json`](versions.json). A weekly workflow checks for a new Ubuntu LTS, Debian stable or Rocky Linux release. It opens a pull request to add a new release when:
+
+- the matching steamcmd base image exists, and
+- the new image builds and passes a smoke test.
+
+The pull request also reports whether LinuxGSM's dependency check passes on the new release. A new Ubuntu LTS also takes the `latest` tag. Rocky Linux 10 is skipped because it has no i686 libraries.
 
 ### Dependency check
 
