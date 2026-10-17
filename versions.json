@@ -4,5 +4,6 @@
   { "distro": "ubuntu", "version": "22.04", "latest": false },
   { "distro": "ubuntu", "version": "20.04", "latest": false },
   { "distro": "debian", "version": "13", "latest": false },
+  { "distro": "debian", "version": "12", "latest": false },
   { "distro": "rocky", "version": "9", "latest": false }
 ]

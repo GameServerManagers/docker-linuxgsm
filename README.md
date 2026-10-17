@@ -25,6 +25,7 @@ LinuxGSM is a command-line tool for quick, simple deployment and management of L
 - `ubuntu-22.04` - Ubuntu 22.04 LTS 'Jammy Jellyfish'
 - `ubuntu-20.04` - Ubuntu 20.04 LTS 'Focal Fossa' (standard support ended May 2025; may be removed)
 - `debian-13` - Debian 13 'Trixie' (for testing LinuxGSM on Debian; not a supported release)
+- `debian-12` - Debian 12 'Bookworm' (for testing LinuxGSM on Debian; not a supported release)
 - `rocky-9` - Rocky Linux 9 (for testing LinuxGSM on the Red Hat family; not a supported release)
 
 Images are built for `linux/amd64` only and use [gameservermanagers/steamcmd](https://github.com/GameServerManagers/docker-steamcmd) as their base. Rocky Linux 10 can't be added, because it no longer ships the 32-bit (i686) libraries SteamCMD needs.
