@@ -114,6 +114,7 @@ RUN echo "**** Install Base LinuxGSM Requirements ****" \
       lib32stdc++6 \
       netcat-openbsd \
       pigz \
+      procps \
       python3 \
       sudo \
       tar \
