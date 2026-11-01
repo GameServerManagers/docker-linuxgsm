@@ -61,8 +61,6 @@ if [ -f "/app/lgsm/package.json" ]; then
   echo -e "npm install in /app/lgsm"
   echo -e "================================="
   cd /app/lgsm || exit
-  # --no-audit: the audit request goes to the registry even when nothing needs
-  # installing, and with the registry unreachable it holds every start for minutes.
   npm install --no-audit
   cd /app || exit
 fi
