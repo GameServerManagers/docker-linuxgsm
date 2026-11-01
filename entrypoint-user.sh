@@ -61,7 +61,7 @@ if [ -f "/app/lgsm/package.json" ]; then
   echo -e "npm install in /app/lgsm"
   echo -e "================================="
   cd /app/lgsm || exit
-  npm install
+  npm install --no-audit
   cd /app || exit
 fi
 
