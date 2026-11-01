@@ -55,15 +55,6 @@ if [ ! -d "/app/lgsm/data" ]; then
   ln -s "${LGSM_DATADIR}" "/app/lgsm/data"
 fi
 
-# Symlink LGSM_BACKUPDIR to /app/lgsm/backup
-if [ ! -d "/app/lgsm/backup" ]; then
-  echo -e ""
-  echo -e "creating symlink for ${LGSM_BACKUPDIR}"
-  echo -e "================================="
-  mkdir -p "${LGSM_BACKUPDIR}"
-  ln -s "${LGSM_BACKUPDIR}" "/app/lgsm/backup"
-fi
-
 # npm install in /app/lgsm
 if [ -f "/app/lgsm/package.json" ]; then
   echo -e ""

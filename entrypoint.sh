@@ -56,7 +56,6 @@ echo -e "LGSM_LOGDIR: ${LGSM_LOGDIR}"
 echo -e "LGSM_SERVERFILES: ${LGSM_SERVERFILES}"
 echo -e "LGSM_DATADIR: ${LGSM_DATADIR}"
 echo -e "LGSM_CONFIG: ${LGSM_CONFIG}"
-echo -e "LGSM_BACKUPDIR: ${LGSM_BACKUPDIR}"
 
 echo -e ""
 echo -e "Initialising"
@@ -69,7 +68,6 @@ export LGSM_LOGDIR=${LGSM_LOGDIR}
 export LGSM_SERVERFILES=${LGSM_SERVERFILES}
 export LGSM_DATADIR=${LGSM_DATADIR}
 export LGSM_CONFIG=${LGSM_CONFIG}
-export LGSM_BACKUPDIR=${LGSM_BACKUPDIR}
 
 cd /app || exit
 
