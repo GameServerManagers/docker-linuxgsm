@@ -102,7 +102,6 @@ jobs:
             done
             cd /app
             gosu linuxgsm ./linuxgsm.sh list > /dev/null
-            gosu linuxgsm steamcmd +login anonymous +quit
           '
 
       - name: Push (${{ matrix.distro }}-${{ matrix.version }})
