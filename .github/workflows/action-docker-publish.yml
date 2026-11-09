@@ -120,7 +120,8 @@ jobs:
   package-cleanup:
     name: Cleanup Old GitHub Packages
     needs: build
-    if: github.event_name != 'pull_request'
+    # GHCR tags reference untagged platform manifests, which this cleanup can delete.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
